@@ -1,9 +1,22 @@
+import { useGertBoards } from "@/hooks/useGetBoards";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
+  const { data: boards } = useGertBoards();
+
   return (
     <View style={styles.container}>
-      <Text>Edit src/app/index.tsx to edit this screen.</Text>
+      {boards?.length === 0 ? (
+        <Text>No boards found.</Text>
+      ) : (
+        boards?.map((board) => (
+          <View key={board.id} style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+              {board.title}
+            </Text>
+          </View>
+        ))
+      )}
     </View>
   );
 }
