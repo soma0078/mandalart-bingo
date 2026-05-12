@@ -38,9 +38,12 @@ export async function getBoardById(id: string): Promise<BoardDetail> {
 // 보드 생성 시 서브 목표 8개 + 셀 64개를 순차적으로 초기화
 // 중간 단계 실패 시 이전 데이터가 남으므로 주의
 export async function createBoard(payload: CreateBoardPayload): Promise<Board> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("No authenticated user");
+
   const { data: board, error: boardError } = await supabase
     .from("boards")
-    .insert(payload)
+    .insert({ ...payload, user_id: user.id })
     .select()
     .single();
 
