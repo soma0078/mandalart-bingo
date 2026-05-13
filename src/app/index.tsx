@@ -1,37 +1,41 @@
 import { CreateBoardSheet } from "@/components/CreateBoardSheet";
+import { MandalaGrid3x3 } from "@/components/MandalaGrid3x3";
 import { useGertBoards } from "@/hooks/useGetBoards";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
-  const { data: boards } = useGertBoards();
+  const { data: boards = [], isLoading } = useGertBoards();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const isEmpty = boards?.length === 0;
+
+  const isEmpty = boards.length === 0;
+
+  if (isLoading) {
+    return <Text>로딩중...</Text>;
+  }
 
   return (
     <View style={styles.container}>
       {isEmpty ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>첫 만다라트를 만들어보세요</Text>
-        </View>
-      ) : (
-        boards?.map((board) => (
-          <View key={board.id} style={{ marginBottom: 16 }}>
-            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-              {board.title}
-            </Text>
+        <>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>첫 만다라트를 만들어보세요</Text>
           </View>
-        ))
-      )}
-
-      {isEmpty ? (
-        <Pressable style={styles.ctaButton} onPress={() => setSheetOpen(true)}>
-          <Text style={styles.ctaButtonText}>첫 만다라트 만들기</Text>
-        </Pressable>
+          <Pressable
+            style={styles.ctaButton}
+            onPress={() => setSheetOpen(true)}
+          >
+            <Text style={styles.ctaButtonText}>첫 만다라트 만들기</Text>
+          </Pressable>
+        </>
       ) : (
-        <Pressable style={styles.fab} onPress={() => setSheetOpen(true)}>
-          <Text style={styles.fabText}>+</Text>
-        </Pressable>
+        <>
+          {/* // TODO: 추후 사용자 설정 기능 추가 필요 */}
+          <MandalaGrid3x3 id={boards[0].id} />
+          <Pressable style={styles.fab} onPress={() => setSheetOpen(true)}>
+            <Text style={styles.fabText}>+</Text>
+          </Pressable>
+        </>
       )}
 
       <CreateBoardSheet
