@@ -1,6 +1,6 @@
 # Phase 1 (MVP)
 
-> 최종 업데이트: 2026-05-13
+> 최종 업데이트: 2026-05-19
 > 기획 문서: [PRD](../PRD-mandalart-bingo.md) | [IA & 스크린 플로우](../IA-screen-flow.md)
 
 ## 구현
@@ -24,3 +24,7 @@
 ### 홈 — 3×3 그리드 표시
 - 구현 범위: `MandalaGrid3x3` 컴포넌트, SubGoal position → 그리드 인덱스 매핑
 - Note: 보드 목록 나열보다 만다라트 구조를 바로 시각화하는 것이 앱의 핵심 가치에 부합
+
+### 보드 목록 탭 (하단 탭 네비게이션)
+- 구현 범위: expo-router `(tabs)` 그룹 도입, `(tabs)/index.tsx` (홈), `(tabs)/list.tsx` (목록), `BoardListItem` 컴포넌트
+- Note: 홈 탭은 `boards[0]` 고정 표시를 유지하고 목록 탭은 전체 보드를 FlatList로 나열. `useGetBoards` 캐시를 두 탭이 공유하므로 별도 네트워크 요청 없음. 루트 `index.tsx`는 `(tabs)`로 Redirect만 담당해 진입점 단순화
