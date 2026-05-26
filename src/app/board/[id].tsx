@@ -8,7 +8,7 @@ import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type EditTarget = { type: "mainGoal"; text: string } | null;
+type EditTarget = { text: string } | null;
 
 export default function BoardViewer() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,17 +17,16 @@ export default function BoardViewer() {
   const { mutate: updateBoard, isPending } = useUpdateBoard();
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
 
-  const completedCount =
-    board?.sub_goals.flatMap((sg) => sg.cells).filter((c) => c.is_completed)
-      .length ?? 0;
-  const totalCells = 64;
+  const allCells = board?.sub_goals.flatMap((sg) => sg.cells) ?? [];
+  const completedCount = allCells.filter((c) => c.is_completed).length;
+  const totalCells = allCells.length;
   const progress = totalCells > 0 ? completedCount / totalCells : 0;
 
   const handleCellPress = (gridIndex: number) => {
     if (!board) return;
 
     if (isCenterCell(gridIndex)) {
-      setEditTarget({ type: "mainGoal", text: board.main_goal });
+      setEditTarget({ text: board.main_goal });
       return;
     }
 

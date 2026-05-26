@@ -55,7 +55,7 @@ export function CellEditSheet({
         useNativeDriver: true,
       }).start();
     }
-  }, [visible, initialText, initialCompleted, translateY]);
+  }, [visible, initialText, initialCompleted]);
 
   const handleSave = () => {
     onSave(text.trim(), showCompletionToggle ? completed : undefined);
@@ -70,7 +70,7 @@ export function CellEditSheet({
     >
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <Pressable style={styles.backdrop} onPress={onClose} />
         <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
