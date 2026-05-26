@@ -1,6 +1,6 @@
 # Phase 1 (MVP)
 
-> 최종 업데이트: 2026-05-19
+> 최종 업데이트: 2026-05-27
 > 기획 문서: [PRD](../PRD-mandalart-bingo.md) | [IA & 스크린 플로우](../IA-screen-flow.md)
 
 ## 구현
@@ -28,3 +28,7 @@
 ### 보드 목록 탭 (하단 탭 네비게이션)
 - 구현 범위: expo-router `(tabs)` 그룹 도입, `(tabs)/index.tsx` (홈), `(tabs)/list.tsx` (목록), `BoardListItem` 컴포넌트
 - Note: 홈 탭은 `boards[0]` 고정 표시를 유지하고 목록 탭은 전체 보드를 FlatList로 나열. `useGetBoards` 캐시를 두 탭이 공유하므로 별도 네트워크 요청 없음. 루트 `index.tsx`는 `(tabs)`로 Redirect만 담당해 진입점 단순화
+
+### 보드 상세 뷰어 및 셀 편집
+- 구현 범위: `app/board/[id].tsx` (보드 상세), `app/board/sub/[subGoalId].tsx` (세부 목표 드릴다운), `CellEditSheet` 바텀시트 컴포넌트, mutation 훅 3종 (`useUpdateBoard`, `useUpdateCell`, `useUpdateSubGoal`)
+- Note: 보드 상세에서 중앙 셀 탭 → 핵심 목표 편집, 외곽 셀 탭 → 세부 목표 드릴다운으로 내비게이션 분기. 세부 목표 화면에서 중앙 셀 탭 → 세부 목표 제목 편집, 외곽 셀 탭 → 실행 항목 편집+완료 토글. `useGetBoardById` 캐시를 mutation 성공 시 invalidate해 별도 리패치 로직 없이 UI 갱신. 진행률은 실제 DB 셀 수 기준으로 계산해 부분 생성 보드에서도 정확하게 표시
