@@ -3,6 +3,7 @@ import { CreateBoardSheet } from "@/components/CreateBoardSheet";
 import { EmptyBoardsState } from "@/components/EmptyBoardsState";
 import { FAB } from "@/components/FAB";
 import { useGertBoards } from "@/hooks/useGetBoards";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ListScreen() {
   const { data: boards = [], isLoading } = useGertBoards();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -32,7 +34,12 @@ export default function ListScreen() {
           <FlatList
             data={boards}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <BoardListItem board={item} />}
+            renderItem={({ item }) => (
+              <BoardListItem
+                board={item}
+                onPress={() => router.push(`/board/${item.id}`)}
+              />
+            )}
             contentContainerStyle={styles.list}
           />
           <FAB onPress={() => setSheetOpen(true)} />

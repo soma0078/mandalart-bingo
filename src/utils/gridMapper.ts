@@ -1,10 +1,6 @@
-/**
- * MandalaGrid3x3 로직 추출
- * - sub_goal position → grid index 매핑
- * - 보드 데이터 → 셀 배열 변환
- */
-
 import { BoardDetail } from "@/types/boards";
+import type { Cell } from "@/types/cells";
+import type { SubGoal } from "@/types/sub-goals";
 
 // sub_goal position(0~7) → 3×3 그리드 인덱스 매핑
 // 0 1 2
@@ -45,9 +41,41 @@ export function boardToCells(board: BoardDetail | undefined): (string | null)[] 
   return cells;
 }
 
-/**
- * 특정 grid index가 중앙 셀인지 확인
- */
 export function isCenterCell(index: number): boolean {
   return index === 4;
+}
+
+// grid index → sub_goal position (SUB_GOAL_TO_GRID 역방향)
+export const GRID_TO_SUB_GOAL_POS: Record<number, number> = Object.fromEntries(
+  Object.entries(SUB_GOAL_TO_GRID).map(([pos, grid]) => [grid, Number(pos)])
+);
+
+export interface SubGoalCellData {
+  text: string | null;
+  isCompleted: boolean;
+  cellId?: string;
+}
+
+// 서브 목표 + 셀 → 9개 그리드 배열 (center = 서브 목표 제목)
+export function subGoalToCells(
+  subGoal: SubGoal & { cells: Cell[] }
+): SubGoalCellData[] {
+  const grid: SubGoalCellData[] = Array(9)
+    .fill(null)
+    .map(() => ({ text: null, isCompleted: false }));
+
+  grid[4] = { text: subGoal.title || "", isCompleted: false };
+
+  subGoal.cells.forEach((cell) => {
+    const gridIndex = SUB_GOAL_TO_GRID[cell.position];
+    if (gridIndex !== undefined) {
+      grid[gridIndex] = {
+        text: cell.text || "",
+        isCompleted: cell.is_completed,
+        cellId: cell.id,
+      };
+    }
+  });
+
+  return grid;
 }

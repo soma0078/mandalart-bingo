@@ -1,13 +1,14 @@
 import React from "react";
 import { useGetBoardById } from "@/hooks/useGetBoardById";
 import { boardToCells, isCenterCell } from "@/utils/gridMapper";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface Props {
   id: string;
+  onCellPress?: (gridIndex: number) => void;
 }
 
-export function MandalaGrid3x3({ id }: Props) {
+export function MandalaGrid3x3({ id, onCellPress }: Props) {
   const { data: board } = useGetBoardById(id);
   const cells = boardToCells(board);
 
@@ -16,9 +17,14 @@ export function MandalaGrid3x3({ id }: Props) {
       <Text style={styles.boardTitle}>{board?.title}</Text>
       <View style={styles.grid}>
         {cells.map((text, index) => (
-          <View
+          <Pressable
             key={index}
-            style={[styles.cell, isCenterCell(index) && styles.centerCell]}
+            style={({ pressed }) => [
+              styles.cell,
+              isCenterCell(index) && styles.centerCell,
+              onCellPress && pressed && styles.cellPressed,
+            ]}
+            onPress={onCellPress ? () => onCellPress(index) : undefined}
           >
             <Text
               style={[styles.cellText, isCenterCell(index) && styles.centerCellText]}
@@ -26,7 +32,7 @@ export function MandalaGrid3x3({ id }: Props) {
             >
               {text || ""}
             </Text>
-          </View>
+          </Pressable>
         ))}
       </View>
     </View>
@@ -55,6 +61,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 8,
+  },
+  cellPressed: {
+    opacity: 0.6,
   },
   centerCell: {
     backgroundColor: "#222",

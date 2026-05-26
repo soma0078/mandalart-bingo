@@ -3,12 +3,14 @@ import { EmptyBoardsState } from "@/components/EmptyBoardsState";
 import { FAB } from "@/components/FAB";
 import { MandalaGrid3x3 } from "@/components/MandalaGrid3x3";
 import { useGertBoards } from "@/hooks/useGetBoards";
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
   const { data: boards = [], isLoading } = useGertBoards();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const router = useRouter();
 
   if (isLoading) {
     return <Text>로딩중...</Text>;
@@ -21,7 +23,9 @@ export default function Index() {
       ) : (
         <>
           {/* TODO: 추후 사용자 설정 기능 추가 필요 */}
-          <MandalaGrid3x3 id={boards[0].id} />
+          <Pressable onPress={() => router.push(`/board/${boards[0].id}`)}>
+            <MandalaGrid3x3 id={boards[0].id} />
+          </Pressable>
           <FAB onPress={() => setSheetOpen(true)} />
         </>
       )}
