@@ -23,6 +23,10 @@ RN 또는 Expo API를 사용하는 코드를 작성하기 전에:
 
 ## 워크플로우
 
-구현·수정·개선 작업 완료 후:
-1. `docs/PRD-mandalart-bingo.md` Phase 체크박스 업데이트
-2. 해당 Phase 문서(`docs/phases/phase1.md` …)에 작업 내용과 설계 근거 기록 및 최종 업데이트 날짜 갱신
+**구현·수정·개선 작업 완료 후 자동으로 다음을 수행:**
+1. `docs/PRD-mandalart-bingo.md` 해당 항목 체크박스 `[ ]` → `[x]` 업데이트
+2. 해당 Phase 문서(`docs/phases/`)에:
+   - 작업 내용과 설계 근거 기록 (구현 범위, Note)
+   - 최종 업데이트 날짜 갱신
+3. 관련 파일 커밋
+ 
