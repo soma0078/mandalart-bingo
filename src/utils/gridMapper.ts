@@ -113,6 +113,17 @@ export function boardToFullGrid(
     const blockRow = Math.floor(blockGridIndex / 3);
     const blockCol = blockGridIndex % 3;
 
+    // 블록의 중앙에 서브 목표 제목 배치 (각 블록의 center = 로컬 (1,1))
+    const blockCenterRow = blockRow * 3 + 1;
+    const blockCenterCol = blockCol * 3 + 1;
+    const blockCenterIndex = blockCenterRow * 9 + blockCenterCol;
+
+    fullGrid[blockCenterIndex] = {
+      text: subGoal.title || "",
+      isCompleted: false,
+      subGoalPosition: subGoal.position,
+    };
+
     // 각 cell 처리
     subGoal.cells.forEach((cell) => {
       // cell의 3×3 그리드 내 위치
