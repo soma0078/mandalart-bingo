@@ -3,12 +3,8 @@ import { MandalaGrid3x3 } from "@/components/MandalaGrid3x3";
 import { MandalaGrid9x9 } from "@/components/MandalaGrid9x9";
 import { useGetBoardById } from "@/hooks/useGetBoardById";
 import { useUpdateBoard } from "@/hooks/useUpdateBoard";
-import {
-  GRID_TO_SUB_GOAL_POS,
-  boardToFullGrid,
-  getCellMetadata,
-  isCenterCell,
-} from "@/utils/gridMapper";
+import { boardToFullGrid } from "@/utils/gridMapper";
+import { useCellNavigation } from "@/utils/cellNavigation";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -23,6 +19,7 @@ export default function BoardViewer() {
   const { mutate: updateBoard, isPending } = useUpdateBoard();
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
   const [viewMode, setViewMode] = useState<"3x3" | "9x9">("3x3");
+  const { handleCellPress: navigateCell } = useCellNavigation(id);
 
   const allCells = board?.sub_goals.flatMap((sg) => sg.cells) ?? [];
   const completedCount = allCells.filter((c) => c.is_completed).length;
@@ -32,35 +29,20 @@ export default function BoardViewer() {
   const handleCellPress = (gridIndex: number) => {
     if (!board) return;
 
-    if (viewMode === "3x3") {
-      // 3×3 모드: 기존 로직
-      if (isCenterCell(gridIndex)) {
-        setEditTarget({ text: board.main_goal });
-        return;
-      }
-
-      const subGoalPos = GRID_TO_SUB_GOAL_POS[gridIndex];
-      const subGoal = board.sub_goals.find((sg) => sg.position === subGoalPos);
-      if (!subGoal) return;
-
-      router.push(`/board/sub/${subGoal.id}?boardId=${id}`);
-    } else {
-      // 9×9 모드: 메타데이터 기반 처리
-      if (gridIndex === 40) {
-        // 중앙 셀 = 핵심 목표
-        setEditTarget({ text: board.main_goal });
-        return;
-      }
-
-      const metadata = getCellMetadata(board, gridIndex);
-      if (!metadata) return;
-
-      if (metadata.type === "mainGoal") {
-        setEditTarget({ text: board.main_goal });
-      } else if (metadata.subGoalId && metadata.type === "cell") {
-        router.push(`/board/sub/${metadata.subGoalId}?boardId=${id}`);
-      }
+    // 3×3 모드에서 중앙 셀: 편집 모드
+    if (viewMode === "3x3" && gridIndex === 4) {
+      setEditTarget({ text: board.main_goal });
+      return;
     }
+
+    // 9×9 모드에서 중앙 셀: 편집 모드
+    if (viewMode === "9x9" && gridIndex === 40) {
+      setEditTarget({ text: board.main_goal });
+      return;
+    }
+
+    // 그 외: 네비게이션
+    navigateCell(gridIndex, viewMode, board);
   };
 
   const handleSave = (text: string) => {

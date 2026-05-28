@@ -5,8 +5,8 @@ import { MandalaGrid3x3 } from "@/components/MandalaGrid3x3";
 import { MandalaGrid9x9 } from "@/components/MandalaGrid9x9";
 import { useGertBoards } from "@/hooks/useGetBoards";
 import { useGetBoardById } from "@/hooks/useGetBoardById";
-import { GRID_TO_SUB_GOAL_POS, boardToFullGrid, getCellMetadata, isCenterCell } from "@/utils/gridMapper";
-import { useRouter } from "expo-router";
+import { boardToFullGrid } from "@/utils/gridMapper";
+import { useCellNavigation } from "@/utils/cellNavigation";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,44 +15,17 @@ export default function Index() {
   const { data: boards = [], isLoading } = useGertBoards();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"3x3" | "9x9">("3x3");
-  const router = useRouter();
 
   const firstBoardId = boards[0]?.id;
   const { data: board } = useGetBoardById(firstBoardId);
+  const { handleCellPress } = useCellNavigation(firstBoardId);
 
   if (isLoading) {
     return <Text>로딩중...</Text>;
   }
 
-  const handleCellPress = (gridIndex: number) => {
-    if (!board || !firstBoardId) return;
-
-    if (viewMode === "3x3") {
-      if (isCenterCell(gridIndex)) {
-        router.push(`/board/${firstBoardId}`);
-        return;
-      }
-
-      const subGoalPos = GRID_TO_SUB_GOAL_POS[gridIndex];
-      const subGoal = board.sub_goals.find((sg) => sg.position === subGoalPos);
-      if (!subGoal) return;
-
-      router.push(`/board/sub/${subGoal.id}?boardId=${firstBoardId}`);
-    } else {
-      if (gridIndex === 40) {
-        router.push(`/board/${firstBoardId}`);
-        return;
-      }
-
-      const metadata = getCellMetadata(board, gridIndex);
-      if (!metadata) return;
-
-      if (metadata.type === "mainGoal") {
-        router.push(`/board/${firstBoardId}`);
-      } else if (metadata.subGoalId && metadata.type === "cell") {
-        router.push(`/board/sub/${metadata.subGoalId}?boardId=${firstBoardId}`);
-      }
-    }
+  const onCellPress = (gridIndex: number) => {
+    handleCellPress(gridIndex, viewMode, board);
   };
 
   return (
@@ -77,11 +50,11 @@ export default function Index() {
 
           <ScrollView contentContainerStyle={styles.gridContainer}>
             {viewMode === "3x3" ? (
-              <MandalaGrid3x3 id={firstBoardId} onCellPress={handleCellPress} />
+              <MandalaGrid3x3 id={firstBoardId} onCellPress={onCellPress} />
             ) : (
               <MandalaGrid9x9
                 fullGrid={boardToFullGrid(board)}
-                onCellPress={handleCellPress}
+                onCellPress={onCellPress}
               />
             )}
           </ScrollView>
