@@ -32,3 +32,7 @@
 ### 보드 상세 뷰어 및 셀 편집
 - 구현 범위: `app/board/[id].tsx` (보드 상세), `app/board/sub/[subGoalId].tsx` (세부 목표 드릴다운), `CellEditSheet` 바텀시트 컴포넌트, mutation 훅 3종 (`useUpdateBoard`, `useUpdateCell`, `useUpdateSubGoal`)
 - Note: 보드 상세에서 중앙 셀 탭 → 핵심 목표 편집, 외곽 셀 탭 → 세부 목표 드릴다운으로 내비게이션 분기. 세부 목표 화면에서 중앙 셀 탭 → 세부 목표 제목 편집, 외곽 셀 탭 → 실행 항목 편집+완료 토글. `useGetBoardById` 캐시를 mutation 성공 시 invalidate해 별도 리패치 로직 없이 UI 갱신. 진행률은 실제 DB 셀 수 기준으로 계산해 부분 생성 보드에서도 정확하게 표시
+
+### 보드 뷰 모드 스위치 (3×3 ↔ 9×9)
+- 구현 범위: `MandalaGrid9x9` 컴포넌트 신규, `gridMapper.ts` 확장 (`boardToFullGrid`, `getCellMetadata`), `app/board/[id].tsx` 뷰 모드 토글 추가
+- Note: 3×3은 세부 목표 8개 + 핵심 목표 중심 뷰 (드릴다운 유도), 9×9는 81칸 전체 표시 (핀치 줌 필요, Phase 2). 그리드 좌표 → SubGoal + Cell 메타데이터 변환 로직으로 모드별 셀 클릭 처리 일원화. 헤더 우측 토글 버튼으로 전환
