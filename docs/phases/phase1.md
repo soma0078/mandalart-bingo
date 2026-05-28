@@ -1,6 +1,6 @@
 # Phase 1 (MVP)
 
-> 최종 업데이트: 2026-05-27 (추가: 빙고 감지)
+> 최종 업데이트: 2026-05-28 (추가: gridMapper 종합 테스트)
 > 기획 문서: [PRD](../PRD-mandalart-bingo.md) | [IA & 스크린 플로우](../IA-screen-flow.md)
 
 ## 구현
@@ -40,3 +40,18 @@
 ### 빙고 감지
 - 구현 범위: `gridMapper.ts`에 `detectBingos()` 함수, `app/board/sub/[subGoalId].tsx`에 빙고 감지 + 알림
 - Note: 9×9 그리드의 20개 라인(9행 + 9열 + 2대각선) 각각의 완료 상태를 감지. 셀 완료 시 보드 재페치되면 새로운 빙고 라인이 완성됐는지 확인하고, 새 빙고만 토스트/Alert로 표시 (이전 빙고 수 ref로 추적해 중복 방지). Phase 1은 애니메이션 없이 단순 Alert/Toast만 표시
+
+## QA 및 테스트
+
+### gridMapper 유틸 함수 종합 테스트
+- 구현 범위: Jest 설정 (`jest.config.js`), `src/__tests__/utils/gridMapper.test.ts` (31개 테스트)
+- 테스트 대상 함수:
+  - `SUB_GOAL_TO_GRID`, `GRID_TO_SUB_GOAL_POS`: 위치 매핑 검증
+  - `isCenterCell`: 중심 셀 판정
+  - `boardToCells`: 3×3 그리드 변환
+  - `subGoalToCells`: 세부 목표 → 9셀 변환
+  - `boardToFullGrid`: 81셀 전체 그리드 변환 (9×9 구조 검증, 중앙 셀 배치, 부분 데이터 처리)
+  - `detectBingos`: 행/열/대각선 빙고 감지
+  - `getCellMetadata`: 그리드 인덱스 → 셀/세부목표 메타데이터 역변환
+- 주요 발견: `boardToFullGrid`에서 하위 목표 블록 중심 위치 올바르게 배치 확인 (이전 버그 수정 검증)
+- 기술: ts-jest + React Native 환경 호환성 구성 (jest 29.7.0, ts-jest 29.4.11)
