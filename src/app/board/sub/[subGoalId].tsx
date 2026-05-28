@@ -4,10 +4,22 @@ import { useUpdateCell } from "@/hooks/useUpdateCell";
 import { useUpdateSubGoal } from "@/hooks/useUpdateSubGoal";
 import type { Cell } from "@/types/cells";
 import type { SubGoal } from "@/types/sub-goals";
-import { isCenterCell, subGoalToCells } from "@/utils/gridMapper";
+import {
+  detectBingos,
+  isCenterCell,
+  subGoalToCells,
+} from "@/utils/gridMapper";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type EditTarget =
@@ -29,6 +41,40 @@ export default function SubGoalViewer() {
 
   const subGoal = board?.sub_goals.find((sg) => sg.id === subGoalId);
   const cells = subGoal ? subGoalToCells(subGoal) : [];
+
+  const prevBingoCountRef = useRef(0);
+
+  useEffect(() => {
+    if (!board) return;
+
+    const currentBingos = detectBingos(board);
+    const currentCount = currentBingos.length;
+
+    if (currentCount > prevBingoCountRef.current) {
+      const newBingos = currentBingos.slice(prevBingoCountRef.current);
+      showBingoToast(newBingos);
+    }
+
+    prevBingoCountRef.current = currentCount;
+  }, [board]);
+
+  const showBingoToast = (bingos: ReturnType<typeof detectBingos>) => {
+    if (bingos.length === 0) return;
+
+    const messages = bingos.map((b) => {
+      if (b.type === "diagonal") {
+        return `대각선 ${b.index === 0 ? "↘" : "↙"} 빙고!`;
+      }
+      return `${b.type === "row" ? "행" : "열"} ${b.index + 1} 빙고!`;
+    });
+    const message = messages.join(" ");
+
+    if (Platform.OS === "android") {
+      ToastAndroid.show(`🎉 ${message}`, ToastAndroid.LONG);
+    } else {
+      Alert.alert("🎉 빙고!", message);
+    }
+  };
 
   const handleCellPress = (gridIndex: number) => {
     if (!subGoal) return;

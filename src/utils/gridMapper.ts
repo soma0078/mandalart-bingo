@@ -211,3 +211,64 @@ export function getCellMetadata(
     cellId: cell.id,
   };
 }
+
+export interface BingoLine {
+  type: "row" | "col" | "diagonal";
+  index: number;
+}
+
+export function detectBingos(board: BoardDetail | undefined): BingoLine[] {
+  if (!board) return [];
+
+  const fullGrid = boardToFullGrid(board);
+  const bingos: BingoLine[] = [];
+
+  // 가로 라인 확인 (9개)
+  for (let row = 0; row < 9; row++) {
+    const startIdx = row * 9;
+    const rowCells = fullGrid.slice(startIdx, startIdx + 9);
+    if (rowCells.every((cell) => cell.isCompleted)) {
+      bingos.push({ type: "row", index: row });
+    }
+  }
+
+  // 세로 라인 확인 (9개)
+  for (let col = 0; col < 9; col++) {
+    let allCompleted = true;
+    for (let row = 0; row < 9; row++) {
+      if (!fullGrid[row * 9 + col].isCompleted) {
+        allCompleted = false;
+        break;
+      }
+    }
+    if (allCompleted) {
+      bingos.push({ type: "col", index: col });
+    }
+  }
+
+  // 대각선 1 (\) 확인
+  let diag1Completed = true;
+  for (let i = 0; i < 9; i++) {
+    if (!fullGrid[i * 9 + i].isCompleted) {
+      diag1Completed = false;
+      break;
+    }
+  }
+  if (diag1Completed) {
+    bingos.push({ type: "diagonal", index: 0 });
+  }
+
+  // 대각선 2 (/) 확인
+  let diag2Completed = true;
+  for (let i = 0; i < 9; i++) {
+    if (!fullGrid[i * 9 + (8 - i)].isCompleted) {
+      diag2Completed = false;
+      break;
+    }
+  }
+  if (diag2Completed) {
+    bingos.push({ type: "diagonal", index: 1 });
+  }
+
+  return bingos;
+}

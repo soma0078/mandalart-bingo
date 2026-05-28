@@ -1,6 +1,6 @@
 # Phase 1 (MVP)
 
-> 최종 업데이트: 2026-05-27
+> 최종 업데이트: 2026-05-27 (추가: 빙고 감지)
 > 기획 문서: [PRD](../PRD-mandalart-bingo.md) | [IA & 스크린 플로우](../IA-screen-flow.md)
 
 ## 구현
@@ -36,3 +36,7 @@
 ### 보드 뷰 모드 스위치 (3×3 ↔ 9×9)
 - 구현 범위: `MandalaGrid9x9` 컴포넌트 신규, `gridMapper.ts` 확장 (`boardToFullGrid`, `getCellMetadata`), `app/board/[id].tsx` 뷰 모드 토글 추가
 - Note: 3×3은 세부 목표 8개 + 핵심 목표 중심 뷰 (드릴다운 유도), 9×9는 81칸 전체 표시 (핀치 줌 필요, Phase 2). 그리드 좌표 → SubGoal + Cell 메타데이터 변환 로직으로 모드별 셀 클릭 처리 일원화. 헤더 우측 토글 버튼으로 전환
+
+### 빙고 감지
+- 구현 범위: `gridMapper.ts`에 `detectBingos()` 함수, `app/board/sub/[subGoalId].tsx`에 빙고 감지 + 알림
+- Note: 9×9 그리드의 20개 라인(9행 + 9열 + 2대각선) 각각의 완료 상태를 감지. 셀 완료 시 보드 재페치되면 새로운 빙고 라인이 완성됐는지 확인하고, 새 빙고만 토스트/Alert로 표시 (이전 빙고 수 ref로 추적해 중복 방지). Phase 1은 애니메이션 없이 단순 Alert/Toast만 표시
