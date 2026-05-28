@@ -79,3 +79,135 @@ export function subGoalToCells(
 
   return grid;
 }
+
+// 9×9 그리드용 셀 데이터 인터페이스 (위치 정보 추가)
+export interface FullGridCell extends SubGoalCellData {
+  subGoalPosition?: number;
+  cellPosition?: number;
+  isMainGoal?: boolean;
+}
+
+// 보드 데이터를 9×9 전체 그리드 배열로 변환
+export function boardToFullGrid(
+  board: BoardDetail | undefined
+): FullGridCell[] {
+  const fullGrid: FullGridCell[] = Array(81)
+    .fill(null)
+    .map(() => ({ text: null, isCompleted: false }));
+
+  if (!board) return fullGrid;
+
+  // 중앙 셀(40 = 4*9 + 4)에 핵심 목표 배치
+  fullGrid[40] = {
+    text: board.main_goal,
+    isCompleted: false,
+    isMainGoal: true,
+  };
+
+  board.sub_goals.forEach((subGoal) => {
+    // 3×3 그리드에서의 block index
+    const blockGridIndex = SUB_GOAL_TO_GRID[subGoal.position];
+    if (blockGridIndex === undefined) return;
+
+    // block의 행/열 좌표
+    const blockRow = Math.floor(blockGridIndex / 3);
+    const blockCol = blockGridIndex % 3;
+
+    // 각 cell 처리
+    subGoal.cells.forEach((cell) => {
+      // cell의 3×3 그리드 내 위치
+      const cellGridIndex = SUB_GOAL_TO_GRID[cell.position];
+      if (cellGridIndex === undefined) return;
+
+      // cell의 행/열 좌표 (3×3 그리드 내)
+      const cellRow = Math.floor(cellGridIndex / 3);
+      const cellCol = cellGridIndex % 3;
+
+      // 9×9 전체 그리드에서의 절대 위치
+      const fullRow = blockRow * 3 + cellRow;
+      const fullCol = blockCol * 3 + cellCol;
+      const fullIndex = fullRow * 9 + fullCol;
+
+      fullGrid[fullIndex] = {
+        text: cell.text || "",
+        isCompleted: cell.is_completed,
+        cellId: cell.id,
+        subGoalPosition: subGoal.position,
+        cellPosition: cell.position,
+      };
+    });
+  });
+
+  return fullGrid;
+}
+
+// 9×9 그리드 인덱스에서 SubGoal + Cell 메타데이터 추출
+export interface CellMetadata {
+  type: "mainGoal" | "subGoal" | "cell";
+  subGoalPosition?: number;
+  cellPosition?: number;
+  subGoalId?: string;
+  cellId?: string;
+}
+
+export function getCellMetadata(
+  board: BoardDetail | undefined,
+  gridIndex9x9: number
+): CellMetadata | null {
+  if (!board || gridIndex9x9 < 0 || gridIndex9x9 >= 81) return null;
+
+  // 중앙 셀(40) → 핵심 목표
+  if (gridIndex9x9 === 40) {
+    return { type: "mainGoal" };
+  }
+
+  // 9×9 좌표로 변환
+  const fullRow = Math.floor(gridIndex9x9 / 9);
+  const fullCol = gridIndex9x9 % 9;
+
+  // 3×3 블록 좌표
+  const blockRow = Math.floor(fullRow / 3);
+  const blockCol = Math.floor(fullCol / 3);
+  const blockGridIndex = blockRow * 3 + blockCol;
+
+  // block이 중앙 블록인지 확인 (1,1)
+  if (blockRow === 1 && blockCol === 1) {
+    // 중앙 블록 내 위치
+    const cellRow = fullRow % 3;
+    const cellCol = fullCol % 3;
+    const cellGridIndex = cellRow * 3 + cellCol;
+
+    // 정확한 중앙(4,4)인 경우 이미 위에서 처리됨, 나머지는 없음
+    // (실제로 중앙 블록은 main_goal만 있고 나머지 8칸은 비어있음)
+    return null;
+  }
+
+  // 일반 블록 → SubGoal 찾기
+  const subGoalPosition = GRID_TO_SUB_GOAL_POS[blockGridIndex];
+  if (subGoalPosition === undefined) return null;
+
+  const subGoal = board.sub_goals.find(
+    (sg) => sg.position === subGoalPosition
+  );
+  if (!subGoal) return null;
+
+  // 블록 내 cell 위치
+  const cellRow = fullRow % 3;
+  const cellCol = fullCol % 3;
+  const cellGridIndex = cellRow * 3 + cellCol;
+
+  // cell의 position 찾기 (center는 없음, 0-7)
+  const cellPosition = GRID_TO_SUB_GOAL_POS[cellGridIndex];
+  if (cellPosition === undefined) return null;
+
+  const cell = subGoal.cells.find((c) => c.position === cellPosition);
+  if (!cell) return null;
+
+  return {
+    type: "cell",
+    subGoalPosition,
+    cellPosition,
+    subGoalId: subGoal.id,
+    cellId: cell.id,
+  };
+}

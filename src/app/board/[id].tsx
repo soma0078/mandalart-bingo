@@ -1,11 +1,17 @@
 import { CellEditSheet } from "@/components/CellEditSheet";
 import { MandalaGrid3x3 } from "@/components/MandalaGrid3x3";
+import { MandalaGrid9x9 } from "@/components/MandalaGrid9x9";
 import { useGetBoardById } from "@/hooks/useGetBoardById";
 import { useUpdateBoard } from "@/hooks/useUpdateBoard";
-import { GRID_TO_SUB_GOAL_POS, isCenterCell } from "@/utils/gridMapper";
+import {
+  GRID_TO_SUB_GOAL_POS,
+  boardToFullGrid,
+  getCellMetadata,
+  isCenterCell,
+} from "@/utils/gridMapper";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type EditTarget = { text: string } | null;
@@ -16,6 +22,7 @@ export default function BoardViewer() {
   const { data: board } = useGetBoardById(id);
   const { mutate: updateBoard, isPending } = useUpdateBoard();
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
+  const [viewMode, setViewMode] = useState<"3x3" | "9x9">("3x3");
 
   const allCells = board?.sub_goals.flatMap((sg) => sg.cells) ?? [];
   const completedCount = allCells.filter((c) => c.is_completed).length;
@@ -25,16 +32,35 @@ export default function BoardViewer() {
   const handleCellPress = (gridIndex: number) => {
     if (!board) return;
 
-    if (isCenterCell(gridIndex)) {
-      setEditTarget({ text: board.main_goal });
-      return;
+    if (viewMode === "3x3") {
+      // 3×3 모드: 기존 로직
+      if (isCenterCell(gridIndex)) {
+        setEditTarget({ text: board.main_goal });
+        return;
+      }
+
+      const subGoalPos = GRID_TO_SUB_GOAL_POS[gridIndex];
+      const subGoal = board.sub_goals.find((sg) => sg.position === subGoalPos);
+      if (!subGoal) return;
+
+      router.push(`/board/sub/${subGoal.id}?boardId=${id}`);
+    } else {
+      // 9×9 모드: 메타데이터 기반 처리
+      if (gridIndex === 40) {
+        // 중앙 셀 = 핵심 목표
+        setEditTarget({ text: board.main_goal });
+        return;
+      }
+
+      const metadata = getCellMetadata(board, gridIndex);
+      if (!metadata) return;
+
+      if (metadata.type === "mainGoal") {
+        setEditTarget({ text: board.main_goal });
+      } else if (metadata.subGoalId && metadata.type === "cell") {
+        router.push(`/board/sub/${metadata.subGoalId}?boardId=${id}`);
+      }
     }
-
-    const subGoalPos = GRID_TO_SUB_GOAL_POS[gridIndex];
-    const subGoal = board.sub_goals.find((sg) => sg.position === subGoalPos);
-    if (!subGoal) return;
-
-    router.push(`/board/sub/${subGoal.id}?boardId=${id}`);
   };
 
   const handleSave = (text: string) => {
@@ -45,6 +71,8 @@ export default function BoardViewer() {
     );
   };
 
+  const fullGrid = boardToFullGrid(board);
+
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       <Stack.Screen
@@ -52,11 +80,27 @@ export default function BoardViewer() {
           headerShown: true,
           title: board?.title ?? "",
           headerBackTitle: "",
+          headerRight: () => (
+            <Pressable
+              onPress={() =>
+                setViewMode(viewMode === "3x3" ? "9x9" : "3x3")
+              }
+              style={styles.headerButton}
+            >
+              <Text style={styles.headerButtonText}>
+                {viewMode === "3x3" ? "전체" : "간략히"}
+              </Text>
+            </Pressable>
+          ),
         }}
       />
 
       <View style={styles.content}>
-        <MandalaGrid3x3 id={id} onCellPress={handleCellPress} />
+        {viewMode === "3x3" ? (
+          <MandalaGrid3x3 id={id} onCellPress={handleCellPress} />
+        ) : (
+          <MandalaGrid9x9 fullGrid={fullGrid} onCellPress={handleCellPress} />
+        )}
       </View>
 
       <View style={styles.progressBar}>
@@ -110,5 +154,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888",
     textAlign: "right",
+  },
+  headerButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  headerButtonText: {
+    fontSize: 14,
+    color: "#000",
+    fontWeight: "600",
   },
 });
