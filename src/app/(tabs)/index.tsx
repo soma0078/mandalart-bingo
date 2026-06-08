@@ -29,7 +29,7 @@ export default function Index() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {boards.length === 0 ? (
         <EmptyBoardsState onPress={() => setSheetOpen(true)} />
       ) : (
@@ -48,7 +48,7 @@ export default function Index() {
             </Pressable>
           </View>
 
-          <ScrollView contentContainerStyle={styles.gridContainer}>
+          <ScrollView contentContainerStyle={styles.gridContainer} contentInsetAdjustmentBehavior="never">
             {viewMode === "3x3" ? (
               <MandalaGrid3x3 id={firstBoardId} onCellPress={onCellPress} />
             ) : (
@@ -108,5 +108,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 20,
+    paddingBottom: 100,
   },
 });

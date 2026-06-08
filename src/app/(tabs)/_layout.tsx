@@ -1,12 +1,55 @@
-import { Tabs } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { Tabs } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors, FontSize, Radius, Spacing } from '@/constants/theme';
 
-function TabIcon({ label, focused }: { label: string; focused: boolean }) {
+function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.iconWrapper}>
-      <Text style={[styles.iconLabel, focused && styles.iconLabelFocused]}>
-        {label}
-      </Text>
+    <View style={[styles.outerContainer, { paddingBottom: insets.bottom + Spacing.sm }]}>
+      <View style={styles.tabBar}>
+        {state.routes.map((route, index) => {
+          const isFocused = state.index === index;
+          const label = descriptors[route.key].options.title ?? route.name;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          return (
+            <Pressable
+              key={route.key}
+              onPress={onPress}
+              style={[styles.tab, isFocused && styles.tabActive]}
+            >
+              <View
+                style={[
+                  styles.dot,
+                  { backgroundColor: isFocused ? Colors.primary : Colors.textMuted },
+                ]}
+              />
+              <Text
+                style={[
+                  styles.tabLabel,
+                  { color: isFocused ? Colors.primary : Colors.textMuted },
+                  isFocused && styles.tabLabelActive,
+                ]}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -14,54 +57,59 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
 export default function TabLayout() {
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: "#000",
-        tabBarInactiveTintColor: "#aaa",
-        tabBarShowLabel: false,
-      }}
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "홈",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon label="홈" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="list"
-        options={{
-          title: "목록",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon label="목록" focused={focused} />
-          ),
-        }}
-      />
+      <Tabs.Screen name="index" options={{ title: '홈' }} />
+      <Tabs.Screen name="list" options={{ title: '목록' }} />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
   tabBar: {
-    borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
-    backgroundColor: "#fff",
-    height: 60,
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderRadius: Radius.xl + Radius.sm,
+    height: 64,
+    width: '100%',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 8,
   },
-  iconWrapper: {
-    alignItems: "center",
-    justifyContent: "center",
+  tab: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    paddingVertical: Spacing.md - 2,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: Radius.xl,
   },
-  iconLabel: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#aaa",
+  tabActive: {
+    backgroundColor: Colors.accentLight,
   },
-  iconLabelFocused: {
-    color: "#000",
-    fontWeight: "700",
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  tabLabel: {
+    fontSize: FontSize.label,
+  },
+  tabLabelActive: {
+    fontWeight: '700',
   },
 });

@@ -15,7 +15,7 @@ export default function ListScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top"]}>
         <Text style={styles.loading}>로딩중...</Text>
       </SafeAreaView>
     );
