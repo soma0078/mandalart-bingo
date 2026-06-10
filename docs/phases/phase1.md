@@ -1,6 +1,6 @@
 # Phase 1 (MVP)
 
-> 최종 업데이트: 2026-05-28 (추가: gridMapper 종합 테스트)
+> 최종 업데이트: 2026-06-10 (추가: 홈 Momentum 뷰 / Concept 5 디자인 구현)
 > 기획 문서: [PRD](../PRD-mandalart-bingo.md) | [IA & 스크린 플로우](../IA-screen-flow.md)
 
 ## 구현
@@ -40,6 +40,13 @@
 ### 빙고 감지
 - 구현 범위: `gridMapper.ts`에 `detectBingos()` 함수, `app/board/sub/[subGoalId].tsx`에 빙고 감지 + 알림
 - Note: 9×9 그리드의 20개 라인(9행 + 9열 + 2대각선) 각각의 완료 상태를 감지. 셀 완료 시 보드 재페치되면 새로운 빙고 라인이 완성됐는지 확인하고, 새 빙고만 토스트/Alert로 표시 (이전 빙고 수 ref로 추적해 중복 방지). Phase 1은 애니메이션 없이 단순 Alert/Toast만 표시
+
+### 홈 Momentum 뷰 — Concept 5 / 5-B 디자인 구현
+- 구현 범위: `(tabs)/index.tsx` 전면 재작성, `(tabs)/_layout.tsx` 탭 아이콘 업데이트, `stats.tsx` / `settings.tsx` 플레이스홀더 신규
+- 화면 구성:
+  - **간략히 (3×3)**: 헤더(날짜·보드명·알림) + 보드 스위처 칩 + ViewSegment + HeroCard(세부목표 포커스 + 액션 목록 + 진행률 링) + 세부목표 미니 3×3 그리드 + 통계 행(스트릭·달성률·빙고)
+  - **전체 (9×9)**: 헤더 + 보드 스위처 + ViewSegment + CollapsedSummary + 블록별 배경색 9×9 그리드 + ProgressFooter
+- Note: `expo-symbols`(SF Symbols) 사용으로 추가 패키지 설치 없이 iOS 시스템 아이콘 적용. `Ionicons` 대신 SF Symbol 이름(`house.fill`, `flame.fill` 등)으로 매핑. 9×9 그리드는 기존 `MandalaGrid9x9` 컴포넌트 변경 없이 홈 전용 `HomeGrid9x9` 인라인 구현 — 블록(3×3)별 배경색과 rounded 처리로 디자인 일치. 탭은 4개(홈·내역·통계·설정)로 확장, 통계·설정은 Phase 2에서 구현 예정이므로 플레이스홀더 유지
 
 ## QA 및 테스트
 

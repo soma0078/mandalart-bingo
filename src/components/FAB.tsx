@@ -1,12 +1,18 @@
 import { Pressable, StyleSheet, Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const TAB_BAR_HEIGHT = 64;
 
 interface Props {
   onPress: () => void;
 }
 
 export function FAB({ onPress }: Props) {
+  const insets = useSafeAreaInsets();
+  const bottom = insets.bottom + TAB_BAR_HEIGHT + 16;
+
   return (
-    <Pressable style={styles.fab} onPress={onPress}>
+    <Pressable style={[styles.fab, { bottom }]} onPress={onPress}>
       <Text style={styles.label}>+</Text>
     </Pressable>
   );
@@ -15,7 +21,6 @@ export function FAB({ onPress }: Props) {
 const styles = StyleSheet.create({
   fab: {
     position: "absolute",
-    bottom: 24,
     right: 24,
     width: 56,
     height: 56,
