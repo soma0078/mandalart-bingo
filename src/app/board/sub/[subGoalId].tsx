@@ -1,4 +1,5 @@
 import { CellEditSheet } from "@/components/CellEditSheet";
+import { BingoCelebrationModal } from "@/components/BingoCelebrationModal";
 import { useGetBoardById } from "@/hooks/useGetBoardById";
 import { useUpdateCell } from "@/hooks/useUpdateCell";
 import { useUpdateSubGoal } from "@/hooks/useUpdateSubGoal";
@@ -14,13 +15,10 @@ import { useThemeColors } from "@/contexts/ThemeContext";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Alert,
-  Platform,
   Pressable,
   StatusBar,
   StyleSheet,
   Text,
-  ToastAndroid,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -42,6 +40,7 @@ export default function SubGoalViewer() {
   const { mutate: updateCell, isPending: isCellSaving } =
     useUpdateCell(boardId);
   const [editTarget, setEditTarget] = useState<EditTarget>(null);
+  const [celebrationBingos, setCelebrationBingos] = useState<BingoLine[]>([]);
 
   const subGoal = board?.sub_goals.find((sg) => sg.id === subGoalId);
   const cells = subGoal ? subGoalToCells(subGoal) : [];
@@ -63,32 +62,11 @@ export default function SubGoalViewer() {
 
     const newBingos = currentBingos.filter((b) => !prevBingosRef.current!.has(toKey(b)));
     if (newBingos.length > 0) {
-      showBingoToast(newBingos);
+      setCelebrationBingos(newBingos);
     }
 
     prevBingosRef.current = currentKeys;
   }, [board]);
-
-  const showBingoToast = (bingos: ReturnType<typeof detectBingos>) => {
-    if (bingos.length === 0) return;
-
-    const messages = bingos.map((b) => {
-      if (b.type === "diagonal") {
-        return `대각선(${b.index === 0 ? "↘" : "↙"}) 한 줄을 완성했어요!`;
-      }
-      if (b.type === "row") {
-        return `가로 ${b.index + 1}번째 줄을 완성했어요!`;
-      }
-      return `세로 ${b.index + 1}번째 줄을 완성했어요!`;
-    });
-    const message = messages.join("\n");
-
-    if (Platform.OS === "android") {
-      ToastAndroid.show(`🎉 ${message}`, ToastAndroid.LONG);
-    } else {
-      Alert.alert("🎉 빙고!", message);
-    }
-  };
 
   const handleCellTap = (gridIndex: number) => {
     if (!subGoal) return;
@@ -205,6 +183,12 @@ export default function SubGoalViewer() {
         isSaving={isSaving}
         onSave={handleSave}
         onClose={() => setEditTarget(null)}
+      />
+
+      <BingoCelebrationModal
+        visible={celebrationBingos.length > 0}
+        newBingos={celebrationBingos}
+        onClose={() => setCelebrationBingos([])}
       />
     </SafeAreaView>
   );
