@@ -21,7 +21,16 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "만다라트 빙고",
+      "shortName": "만다라트",
+      "description": "만다라트 기법으로 목표를 설정하고 빙고처럼 달성을 추적하는 앱",
+      "themeColor": "#6C63FF",
+      "backgroundColor": "#FFFFFF",
+      "display": "standalone",
+      "orientation": "any",
+      "lang": "ko",
+      "startUrl": "/"
     },
     "plugins": [
       "expo-router",
