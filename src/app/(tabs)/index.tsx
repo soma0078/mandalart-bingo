@@ -13,7 +13,6 @@ import { SymbolView } from 'expo-symbols';
 
 import { useGertBoards } from '@/hooks/useGetBoards';
 import { useGetBoardById } from '@/hooks/useGetBoardById';
-import { FAB } from '@/components/FAB';
 import { HeroCard } from '@/components/home/HeroCard';
 import { MiniGoalGrid } from '@/components/home/MiniGoalGrid';
 import { HomeGrid9x9 } from '@/components/home/HomeGrid9x9';
@@ -22,6 +21,7 @@ import {
   detectBingos,
 } from '@/utils/gridMapper';
 import { useCellNavigation } from '@/utils/cellNavigation';
+import { BoardEditSheet } from '@/components/BoardEditSheet';
 import { CreateBoardSheet } from '@/components/CreateBoardSheet';
 import { EmptyBoardsState } from '@/components/EmptyBoardsState';
 import { Spacing } from '@/constants/theme';
@@ -292,6 +292,7 @@ export default function HomeScreen() {
   const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>();
   const [viewMode, setViewMode] = useState<'brief' | 'full'>('brief');
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [boardEditOpen, setBoardEditOpen] = useState(false);
 
   useEffect(() => {
     if (selectedBoardId && boards.length > 0 && !boards.find((b) => b.id === selectedBoardId)) {
@@ -355,15 +356,23 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={[styles.headerDate, { color: C.textSecondary }]}>{today}</Text>
-            <View style={styles.boardSelector}>
+            <Pressable style={styles.boardSelector} onPress={() => setBoardEditOpen(true)}>
               <Text style={[styles.boardSelectorName, { color: C.textPrimary }]} numberOfLines={1}>
                 {board?.title ?? '보드 선택'}
               </Text>
-              <SymbolView name="chevron.down" size={14} tintColor={C.textPrimary} />
-            </View>
+              <SymbolView name="arrow.up.arrow.down" size={14} tintColor={C.textPrimary} />
+            </Pressable>
           </View>
-          <View style={[styles.notifBtn, { backgroundColor: C.white }]}>
-            <SymbolView name="bell" size={20} tintColor={C.textPrimary} />
+          <View style={styles.headerRight}>
+            <Pressable
+              onPress={() => setSheetOpen(true)}
+              style={[styles.headerBtn, { backgroundColor: C.white }]}
+            >
+              <SymbolView name="plus" size={20} tintColor={C.textPrimary} />
+            </Pressable>
+            <View style={[styles.headerBtn, { backgroundColor: C.white }]}>
+              <SymbolView name="bell" size={20} tintColor={C.textPrimary} />
+            </View>
           </View>
         </View>
 
@@ -459,8 +468,14 @@ export default function HomeScreen() {
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      <FAB onPress={() => setSheetOpen(true)} />
       <CreateBoardSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} />
+      <BoardEditSheet
+        visible={boardEditOpen}
+        boards={boards}
+        selectedBoardId={effectiveBoardId}
+        onSelect={(id) => setSelectedBoardId(id)}
+        onClose={() => setBoardEditOpen(false)}
+      />
     </View>
   );
 }
@@ -503,7 +518,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     maxWidth: 220,
   },
-  notifBtn: {
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerBtn: {
     width: 40,
     height: 40,
     borderRadius: 12,

@@ -48,7 +48,13 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             <Pressable
               key={route.key}
               onPress={onPress}
-              style={[styles.tab, isFocused && [styles.tabActive, { backgroundColor: C.accentLight }]]}
+              style={[
+                styles.tab,
+                isFocused && [
+                  styles.tabActive,
+                  { backgroundColor: C.accentLight },
+                ],
+              ]}
             >
               <SymbolView
                 name={
