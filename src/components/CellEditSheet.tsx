@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Colors, FontSize, Spacing } from '@/constants/theme';
+import { FontSize, Spacing } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 
 interface Props {
   visible: boolean;
   label: string;
   initialText: string;
-  showCompletionToggle?: boolean;
-  initialCompleted?: boolean;
   isSaving?: boolean;
-  onSave: (text: string, completed?: boolean) => void;
+  onSave: (text: string) => void;
   onClose: () => void;
 }
 
@@ -20,21 +19,15 @@ export function CellEditSheet({
   visible,
   label,
   initialText,
-  showCompletionToggle = false,
-  initialCompleted = false,
   isSaving = false,
   onSave,
   onClose,
 }: Props) {
   const [text, setText] = useState(initialText);
-  const [completed, setCompleted] = useState(initialCompleted);
 
   useEffect(() => {
-    if (visible) {
-      setText(initialText);
-      setCompleted(initialCompleted);
-    }
-  }, [visible, initialText, initialCompleted]);
+    if (visible) setText(initialText);
+  }, [visible, initialText]);
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
@@ -49,21 +42,9 @@ export function CellEditSheet({
         />
       </View>
 
-      {showCompletionToggle && (
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>완료</Text>
-          <Switch
-            value={completed}
-            onValueChange={setCompleted}
-            trackColor={{ true: Colors.primary, false: Colors.border }}
-            thumbColor={Colors.white}
-          />
-        </View>
-      )}
-
       <Button
         label={isSaving ? '저장 중...' : '저장'}
-        onPress={() => onSave(text.trim(), showCompletionToggle ? completed : undefined)}
+        onPress={() => onSave(text.trim())}
         disabled={isSaving}
       />
     </BottomSheet>

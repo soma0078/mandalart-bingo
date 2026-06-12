@@ -76,7 +76,7 @@ export default function SubGoalViewer() {
     }
   };
 
-  const handleCellPress = (gridIndex: number) => {
+  const handleCellTap = (gridIndex: number) => {
     if (!subGoal) return;
 
     if (isCenterCell(gridIndex)) {
@@ -88,10 +88,20 @@ export default function SubGoalViewer() {
     if (!cellData?.cellId) return;
     const cell = subGoal.cells.find((c) => c.id === cellData.cellId);
     if (!cell) return;
+    updateCell({ id: cell.id, payload: { is_completed: !cell.is_completed } });
+  };
+
+  const handleCellLongPress = (gridIndex: number) => {
+    if (!subGoal || isCenterCell(gridIndex)) return;
+
+    const cellData = cells[gridIndex];
+    if (!cellData?.cellId) return;
+    const cell = subGoal.cells.find((c) => c.id === cellData.cellId);
+    if (!cell) return;
     setEditTarget({ type: "cell", cell });
   };
 
-  const handleSave = (text: string, completed?: boolean) => {
+  const handleSave = (text: string) => {
     if (!editTarget) return;
 
     if (editTarget.type === "subGoal") {
@@ -101,13 +111,7 @@ export default function SubGoalViewer() {
       );
     } else {
       updateCell(
-        {
-          id: editTarget.cell.id,
-          payload: {
-            text,
-            ...(completed !== undefined ? { is_completed: completed } : {}),
-          },
-        },
+        { id: editTarget.cell.id, payload: { text } },
         { onSuccess: () => setEditTarget(null) }
       );
     }
@@ -123,8 +127,6 @@ export default function SubGoalViewer() {
       : editTarget?.type === "cell"
         ? editTarget.cell.text
         : "";
-  const editInitialCompleted =
-    editTarget?.type === "cell" ? editTarget.cell.is_completed : false;
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
@@ -149,7 +151,9 @@ export default function SubGoalViewer() {
                   cellData.isCompleted && !isCenter && styles.completedCell,
                   pressed && styles.cellPressed,
                 ]}
-                onPress={() => handleCellPress(index)}
+                onPress={() => handleCellTap(index)}
+                onLongPress={() => handleCellLongPress(index)}
+                delayLongPress={400}
               >
                 {cellData.isCompleted && !isCenter && (
                   <Text style={styles.checkmark}>✓</Text>
@@ -168,14 +172,13 @@ export default function SubGoalViewer() {
             );
           })}
         </View>
+        <Text style={styles.hint}>셀을 탭하면 완료 처리, 길게 누르면 텍스트를 수정할 수 있어요</Text>
       </View>
 
       <CellEditSheet
         visible={editTarget !== null}
         label={editLabel}
         initialText={editInitialText}
-        showCompletionToggle={editTarget?.type === "cell"}
-        initialCompleted={editInitialCompleted}
         isSaving={isSaving}
         onSave={handleSave}
         onClose={() => setEditTarget(null)}
@@ -235,5 +238,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#2e7d32",
     fontWeight: "700",
+  },
+  hint: {
+    marginTop: 20,
+    fontSize: 12,
+    color: "#aaa",
+    textAlign: "center",
   },
 });
