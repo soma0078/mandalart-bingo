@@ -9,6 +9,7 @@ interface MiniCellData {
   isMain: boolean;
   isActive: boolean;
   gridIndex: number;
+  pct: number;
 }
 
 interface Props {
@@ -20,15 +21,18 @@ export function MiniGoalGrid({ board, onCellPress }: Props) {
   const cells: (MiniCellData | null)[] = Array(9).fill(null);
 
   if (board) {
-    cells[4] = { title: board.main_goal, isMain: true, isActive: false, gridIndex: 4 };
+    cells[4] = { title: board.main_goal, isMain: true, isActive: false, gridIndex: 4, pct: 0 };
     for (const sg of board.sub_goals) {
       const gi = SUB_GOAL_TO_GRID[sg.position];
       if (gi !== undefined) {
+        const completed = sg.cells.filter((c) => c.is_completed).length;
+        const total = sg.cells.length;
         cells[gi] = {
           title: sg.title || '',
           isMain: false,
-          isActive: sg.cells.some((c) => c.is_completed),
+          isActive: completed > 0,
           gridIndex: gi,
+          pct: total > 0 ? Math.round((completed / total) * 100) : 0,
         };
       }
     }
@@ -68,9 +72,14 @@ export function MiniGoalGrid({ board, onCellPress }: Props) {
                 ]}
               >
                 {cell ? (
-                  <Text style={[styles.cellText, cell.isActive && styles.cellTextActive]} numberOfLines={2}>
-                    {cell.title}
-                  </Text>
+                  <>
+                    <Text style={[styles.cellText, cell.isActive && styles.cellTextActive]} numberOfLines={2}>
+                      {cell.title}
+                    </Text>
+                    <View style={styles.progressBg}>
+                      <View style={[styles.progressFill, { width: `${cell.pct}%` as any }]} />
+                    </View>
+                  </>
                 ) : (
                   <Text style={styles.emptyPlus}>+</Text>
                 )}
@@ -111,4 +120,17 @@ const styles = StyleSheet.create({
   cellTextActive: { color: Colors.textPrimary },
   mainText: { fontSize: 12, fontWeight: '700', color: Colors.white, textAlign: 'center' },
   emptyPlus: { fontSize: 18, fontWeight: '300', color: Colors.border, textAlign: 'center' },
+  progressBg: {
+    width: '100%',
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: Colors.primaryEnd,
+  },
 });

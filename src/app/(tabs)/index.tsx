@@ -167,10 +167,10 @@ const stats = StyleSheet.create({
 // ─── CollapsedSummary ─────────────────────────────────────
 
 function CollapsedSummary({
-  board,
+  subGoal,
   completionPct,
 }: {
-  board: BoardDetail | undefined;
+  subGoal: BoardDetail['sub_goals'][0] | undefined;
   completionPct: number;
 }) {
   return (
@@ -179,17 +179,15 @@ function CollapsedSummary({
         <View style={collapse.dotBg}>
           <SymbolView name="flame.fill" size={16} tintColor={Colors.primary} />
         </View>
-        <View style={{ gap: 2 }}>
-          <Text style={collapse.title} numberOfLines={1}>
-            {board?.main_goal || '핵심 목표'}
-          </Text>
-          <Text style={collapse.sub}>{board?.title || ''}</Text>
-        </View>
+        <Text style={collapse.title} numberOfLines={1}>
+          {subGoal?.title || '세부 목표'}
+        </Text>
       </View>
       <View style={collapse.right}>
         <View style={collapse.progressBg}>
           <View style={[collapse.progressFill, { width: `${completionPct}%` as any }]} />
         </View>
+        <Text style={collapse.pct}>{completionPct}%</Text>
         <SymbolView name="chevron.up" size={16} tintColor={Colors.textMuted} />
       </View>
     </View>
@@ -237,6 +235,7 @@ const collapse = StyleSheet.create({
     overflow: 'hidden',
   },
   progressFill: { height: '100%', borderRadius: 2, backgroundColor: Colors.primaryEnd },
+  pct: { fontSize: 13, fontWeight: '700', color: Colors.primary },
 });
 
 
@@ -309,10 +308,19 @@ export default function HomeScreen() {
   const bingoCount = useMemo(() => detectBingos(board).length, [board]);
   const statsData = useMemo(() => getCompletionStats(board), [board]);
 
-  const focusedSubGoal = useMemo(
-    () => board?.sub_goals?.find((sg) => sg.cells.some((c) => c.is_completed)) ?? board?.sub_goals?.[0],
-    [board]
-  );
+  const focusedSubGoal = useMemo(() => {
+    if (!board?.sub_goals?.length) return undefined;
+    const withPct = board.sub_goals.map((sg) => ({
+      sg,
+      pct: sg.cells.length > 0
+        ? sg.cells.filter((c) => c.is_completed).length / sg.cells.length
+        : 0,
+    }));
+    // 100% 완료 제외, 진행률 높은 순 → 없으면 미시작 포함 전체에서 첫 번째
+    const inProgress = withPct.filter(({ pct }) => pct > 0 && pct < 1);
+    const sorted = inProgress.sort((a, b) => b.pct - a.pct);
+    return sorted[0]?.sg ?? withPct[0].sg;
+  }, [board]);
 
   const onCellPress = (gridIndex: number) => {
     handleCellPress(gridIndex, viewMode === 'brief' ? '3x3' : '9x9', board);
@@ -423,7 +431,18 @@ export default function HomeScreen() {
         ) : (
           <>
             {/* Collapsed Summary */}
-            <CollapsedSummary board={board} completionPct={statsData.pct} />
+            <CollapsedSummary
+              subGoal={focusedSubGoal}
+              completionPct={
+                focusedSubGoal
+                  ? Math.round(
+                      (focusedSubGoal.cells.filter((c) => c.is_completed).length /
+                        focusedSubGoal.cells.length) *
+                        100,
+                    )
+                  : 0
+              }
+            />
 
             {/* 9×9 Full Grid */}
             <HomeGrid9x9 fullGrid={fullGrid} onCellPress={onCellPress} />
