@@ -1,4 +1,5 @@
-import { Colors, FontSize, Radius, Spacing } from "@/constants/theme";
+import { FontSize, Radius, Spacing } from "@/constants/theme";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Tabs } from "expo-router";
 import { SymbolView } from "expo-symbols";
@@ -13,6 +14,7 @@ const TAB_ICONS: Record<string, { active: string; inactive: string }> = {
 };
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const C = useThemeColors();
   const insets = useSafeAreaInsets();
 
   return (
@@ -22,7 +24,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         { paddingBottom: insets.bottom + Spacing.sm },
       ]}
     >
-      <View style={styles.tabBar}>
+      <View style={[styles.tabBar, { backgroundColor: C.white }]}>
         {state.routes.map((route, index) => {
           const isFocused = state.index === index;
           const label = descriptors[route.key].options.title ?? route.name;
@@ -46,19 +48,19 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             <Pressable
               key={route.key}
               onPress={onPress}
-              style={[styles.tab, isFocused && styles.tabActive]}
+              style={[styles.tab, isFocused && [styles.tabActive, { backgroundColor: C.accentLight }]]}
             >
               <SymbolView
                 name={
                   isFocused ? (icons.active as any) : (icons.inactive as any)
                 }
                 size={22}
-                tintColor={isFocused ? Colors.primary : Colors.textMuted}
+                tintColor={isFocused ? C.primary : C.textMuted}
               />
               <Text
                 style={[
                   styles.tabLabel,
-                  { color: isFocused ? Colors.primary : Colors.textMuted },
+                  { color: isFocused ? C.primary : C.textMuted },
                   isFocused && styles.tabLabelActive,
                 ]}
               >
@@ -97,7 +99,6 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: "row",
-    backgroundColor: Colors.white,
     borderRadius: Radius.xl + Radius.sm,
     height: 64,
     width: "100%",
@@ -118,9 +119,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     borderRadius: Radius.xl,
   },
-  tabActive: {
-    backgroundColor: Colors.accentLight,
-  },
+  tabActive: {},
   tabLabel: {
     fontSize: FontSize.label,
   },

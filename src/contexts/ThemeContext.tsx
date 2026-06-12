@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Appearance, ColorSchemeName } from 'react-native';
+import { Appearance, ColorSchemeName, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Colors } from '@/constants/theme';
+import { LightColors, DarkColors } from '@/constants/theme';
 import { DEFAULT_THEME_COLOR, THEME_COLOR_OPTIONS, type ThemeColorSet } from '@/constants/themeColors';
 
 const STORAGE_KEY_COLOR = '@theme_color';
@@ -72,14 +72,31 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-// Colors 객체에 동적 primary 색상을 오버라이드해서 반환
+// 현재 스킴에 맞는 전체 색상 + dynamic primary 반환
 export function useThemeColors() {
-  const { colorSet } = useTheme();
+  const { colorSet, appTheme } = useTheme();
+  const systemScheme = useColorScheme();
+
+  const effectiveScheme =
+    appTheme === 'system' ? (systemScheme ?? 'light') : appTheme;
+
+  const base = effectiveScheme === 'dark' ? DarkColors : LightColors;
+
+  // 다크 모드에서 accentLight/accentBorder는 primary 기반으로 어둡게 파생
+  const accentLight =
+    effectiveScheme === 'dark'
+      ? `${colorSet.primary}22`
+      : colorSet.accentLight;
+  const accentBorder =
+    effectiveScheme === 'dark'
+      ? `${colorSet.primary}55`
+      : colorSet.accentBorder;
+
   return {
-    ...Colors,
+    ...base,
     primary: colorSet.primary,
     primaryEnd: colorSet.primaryEnd,
-    accentLight: colorSet.accentLight,
-    accentBorder: colorSet.accentBorder,
+    accentLight,
+    accentBorder,
   };
 }

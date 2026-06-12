@@ -1,5 +1,4 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { Colors } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import type { FullGridCell } from '@/utils/gridMapper';
 
@@ -46,9 +45,10 @@ export function HomeGrid9x9({ fullGrid, onCellPress }: Props) {
                           <Text
                             style={[
                               styles.cellText,
-                              isCompleted && styles.cellCompletedText,
-                              isSubGoalCenter && styles.cellSubGoalText,
-                              isMainGoal && styles.cellMainText,
+                              { color: C.textSecondary },
+                              isCompleted && [styles.cellCompletedText, { color: C.white }],
+                              isSubGoalCenter && [styles.cellSubGoalText, { color: C.textPrimary }],
+                              isMainGoal && [styles.cellMainText, { color: C.white }],
                             ]}
                             numberOfLines={2}
                           >
@@ -85,8 +85,8 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   cellSubGoal: { backgroundColor: 'rgba(0,0,0,0.06)' },
-  cellText: { fontSize: 7, color: Colors.textSecondary, textAlign: 'center' },
-  cellCompletedText: { color: Colors.white, fontWeight: '500' },
-  cellSubGoalText: { fontSize: 7, color: Colors.textPrimary, fontWeight: '600' },
-  cellMainText: { fontSize: 7, color: Colors.white, fontWeight: '700' },
+  cellText: { fontSize: 7, textAlign: 'center' },
+  cellCompletedText: { fontWeight: '500' },
+  cellSubGoalText: { fontSize: 7, fontWeight: '600' },
+  cellMainText: { fontSize: 7, fontWeight: '700' },
 });

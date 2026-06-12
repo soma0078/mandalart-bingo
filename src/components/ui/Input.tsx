@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, TextInputProps } from 'react-native';
-import { Colors, FontSize, Radius } from '@/constants/theme';
+import { FontSize, Radius } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 
 type Props = TextInputProps;
@@ -14,7 +14,7 @@ export function Input({ style, onFocus, onBlur, value, multiline, ...rest }: Pro
     <TextInput
       value={value}
       multiline={multiline}
-      placeholderTextColor={Colors.textMuted}
+      placeholderTextColor={C.textMuted}
       textAlignVertical={multiline ? 'top' : 'center'}
       {...rest}
       onFocus={(e) => {
@@ -27,9 +27,10 @@ export function Input({ style, onFocus, onBlur, value, multiline, ...rest }: Pro
       }}
       style={[
         styles.input,
+        { color: C.textPrimary },
         isActive
-          ? [styles.activeBase, { borderColor: C.primary }]
-          : styles.default,
+          ? { backgroundColor: C.white, borderWidth: 2, borderColor: C.primary }
+          : { backgroundColor: C.inputBg, borderWidth: 1.5, borderColor: C.border },
         multiline && styles.multiline,
         style,
       ]}
@@ -44,16 +45,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     height: 52,
     fontSize: FontSize.body,
-    color: Colors.textPrimary,
-  },
-  default: {
-    backgroundColor: Colors.inputBg,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-  },
-  activeBase: {
-    backgroundColor: Colors.white,
-    borderWidth: 2,
   },
   multiline: {
     height: undefined,

@@ -6,7 +6,8 @@ import { z } from 'zod';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Colors, FontSize, Spacing } from '@/constants/theme';
+import { FontSize, Spacing } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 
 const createBoardSchema = z.object({
   title: z.string().min(1, '제목을 입력해주세요'),
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function CreateBoardSheet({ visible, onClose }: Props) {
+  const C = useThemeColors();
   const { mutate: create, isPending } = useCreateBoard();
 
   const {
@@ -46,7 +48,7 @@ export function CreateBoardSheet({ visible, onClose }: Props) {
   return (
     <BottomSheet visible={visible} onClose={handleClose}>
       <View style={styles.fieldGroup}>
-        <Text style={styles.fieldLabel}>만다라트 이름</Text>
+        <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>만다라트 이름</Text>
         <Controller
           control={control}
           name="title"
@@ -61,7 +63,7 @@ export function CreateBoardSheet({ visible, onClose }: Props) {
       </View>
 
       <View style={styles.fieldGroup}>
-        <Text style={styles.fieldLabel}>핵심 목표</Text>
+        <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>핵심 목표</Text>
         <Controller
           control={control}
           name="main_goal"
@@ -91,6 +93,5 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: FontSize.label,
     fontWeight: '600',
-    color: Colors.textSecondary,
   },
 });

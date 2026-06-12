@@ -4,7 +4,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { FontSize, Spacing } from '@/constants/theme';
-import { Colors } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 
 interface Props {
   visible: boolean;
@@ -23,6 +23,7 @@ export function CellEditSheet({
   onSave,
   onClose,
 }: Props) {
+  const C = useThemeColors();
   const [text, setText] = useState(initialText);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export function CellEditSheet({
   return (
     <BottomSheet visible={visible} onClose={onClose}>
       <View style={styles.fieldGroup}>
-        <Text style={styles.fieldLabel}>{label}</Text>
+        <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{label}</Text>
         <Input
           value={text}
           onChangeText={setText}
@@ -58,7 +59,6 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: FontSize.label,
     fontWeight: '600',
-    color: Colors.textSecondary,
   },
   toggleRow: {
     flexDirection: 'row',
@@ -67,6 +67,5 @@ const styles = StyleSheet.create({
   },
   toggleLabel: {
     fontSize: FontSize.body,
-    color: Colors.textPrimary,
   },
 });

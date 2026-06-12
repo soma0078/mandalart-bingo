@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { Colors, FontSize } from '@/constants/theme';
+import { FontSize } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 
 interface Props {
@@ -15,7 +15,7 @@ export function ProgressBar({ progress, label, value, style }: Props) {
   const pct: `${number}%` = `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%`;
   return (
     <View style={[styles.container, style]}>
-      <View style={styles.track}>
+      <View style={[styles.track, { backgroundColor: C.border }]}>
         <LinearGradient
           colors={[C.primary, C.primaryEnd]}
           start={{ x: 0, y: 0 }}
@@ -25,7 +25,7 @@ export function ProgressBar({ progress, label, value, style }: Props) {
       </View>
       {(label != null || value != null) && (
         <View style={styles.meta}>
-          {label != null && <Text style={styles.metaLabel}>{label}</Text>}
+          {label != null && <Text style={[styles.metaLabel, { color: C.textMuted }]}>{label}</Text>}
           {value != null && <Text style={[styles.metaValue, { color: C.primary }]}>{value}</Text>}
         </View>
       )}
@@ -37,7 +37,6 @@ const styles = StyleSheet.create({
   container: { gap: 6 },
   track: {
     height: 6,
-    backgroundColor: Colors.border,
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -51,7 +50,6 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontSize: FontSize.label,
-    color: Colors.textMuted,
   },
   metaValue: {
     fontSize: FontSize.label,

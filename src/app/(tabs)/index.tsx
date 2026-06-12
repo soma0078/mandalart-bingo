@@ -24,7 +24,7 @@ import {
 import { useCellNavigation } from '@/utils/cellNavigation';
 import { CreateBoardSheet } from '@/components/CreateBoardSheet';
 import { EmptyBoardsState } from '@/components/EmptyBoardsState';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import type { Board, BoardDetail } from '@/types/boards';
 
@@ -56,27 +56,27 @@ function ViewSegment({ mode, onToggle }: { mode: 'brief' | 'full'; onToggle: () 
   const isBrief = mode === 'brief';
 
   return (
-    <View style={seg.container}>
+    <View style={[seg.container, { backgroundColor: C.white }]}>
       {isBrief ? (
         <LinearGradient colors={[C.primary, C.primaryEnd]} style={seg.button}>
-          <SymbolView name="square.grid.2x2.fill" size={14} tintColor={Colors.white} />
-          <Text style={[seg.text, seg.textActive]}>간략히</Text>
+          <SymbolView name="square.grid.2x2.fill" size={14} tintColor={C.white} />
+          <Text style={[seg.text, { color: C.textMuted }, seg.textActive, { color: C.white }]}>간략히</Text>
         </LinearGradient>
       ) : (
         <Pressable onPress={onToggle} style={seg.button}>
-          <SymbolView name="square.grid.2x2.fill" size={14} tintColor={Colors.textMuted} />
-          <Text style={seg.text}>간략히</Text>
+          <SymbolView name="square.grid.2x2.fill" size={14} tintColor={C.textMuted} />
+          <Text style={[seg.text, { color: C.textMuted }]}>간략히</Text>
         </Pressable>
       )}
       {!isBrief ? (
         <LinearGradient colors={[C.primary, C.primaryEnd]} style={seg.button}>
-          <SymbolView name="square.grid.3x3.fill" size={14} tintColor={Colors.white} />
-          <Text style={[seg.text, seg.textActive]}>전체</Text>
+          <SymbolView name="square.grid.3x3.fill" size={14} tintColor={C.white} />
+          <Text style={[seg.text, { color: C.textMuted }, seg.textActive, { color: C.white }]}>전체</Text>
         </LinearGradient>
       ) : (
         <Pressable onPress={onToggle} style={seg.button}>
-          <SymbolView name="square.grid.3x3.fill" size={14} tintColor={Colors.textMuted} />
-          <Text style={seg.text}>전체</Text>
+          <SymbolView name="square.grid.3x3.fill" size={14} tintColor={C.textMuted} />
+          <Text style={[seg.text, { color: C.textMuted }]}>전체</Text>
         </Pressable>
       )}
     </View>
@@ -86,7 +86,6 @@ function ViewSegment({ mode, onToggle }: { mode: 'brief' | 'full'; onToggle: () 
 const seg = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
     borderRadius: 22,
     height: 44,
     padding: 4,
@@ -106,11 +105,9 @@ const seg = StyleSheet.create({
   },
   text: {
     fontSize: 13,
-    color: Colors.textMuted,
   },
   textActive: {
     fontWeight: '700',
-    color: Colors.white,
   },
 });
 
@@ -135,25 +132,24 @@ function StatsRow({
   ];
 
   return (
-    <View style={stats.row}>
+    <View style={statsRow.row}>
       {items.map((item) => (
-        <View key={item.label} style={stats.card}>
-          <View style={stats.iconRow}>
+        <View key={item.label} style={[statsRow.card, { backgroundColor: C.white }]}>
+          <View style={statsRow.iconRow}>
             <SymbolView name={item.sym} size={16} tintColor={item.color} />
           </View>
-          <Text style={stats.value}>{item.value}</Text>
-          <Text style={stats.label}>{item.label}</Text>
+          <Text style={[statsRow.value, { color: C.textPrimary }]}>{item.value}</Text>
+          <Text style={[statsRow.label, { color: C.textMuted }]}>{item.label}</Text>
         </View>
       ))}
     </View>
   );
 }
 
-const stats = StyleSheet.create({
+const statsRow = StyleSheet.create({
   row: { flexDirection: 'row', gap: 10 },
   card: {
     flex: 1,
-    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 14,
     gap: 8,
@@ -164,8 +160,8 @@ const stats = StyleSheet.create({
     elevation: 2,
   },
   iconRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  value: { fontSize: 16, fontWeight: '800', color: Colors.textPrimary },
-  label: { fontSize: 11, color: Colors.textMuted },
+  value: { fontSize: 16, fontWeight: '800' },
+  label: { fontSize: 11 },
 });
 
 // ─── CollapsedSummary ─────────────────────────────────────
@@ -180,21 +176,21 @@ function CollapsedSummary({
   const C = useThemeColors();
 
   return (
-    <View style={collapse.container}>
+    <View style={[collapse.container, { backgroundColor: C.white }]}>
       <View style={collapse.left}>
         <View style={[collapse.dotBg, { backgroundColor: C.accentLight }]}>
           <SymbolView name="flame.fill" size={16} tintColor={C.primary} />
         </View>
-        <Text style={collapse.title} numberOfLines={1}>
+        <Text style={[collapse.title, { color: C.textPrimary }]} numberOfLines={1}>
           {subGoal?.title || '세부 목표'}
         </Text>
       </View>
       <View style={collapse.right}>
-        <View style={collapse.progressBg}>
+        <View style={[collapse.progressBg, { backgroundColor: C.border }]}>
           <View style={[collapse.progressFill, { width: `${completionPct}%` as any, backgroundColor: C.primaryEnd }]} />
         </View>
         <Text style={[collapse.pct, { color: C.primary }]}>{completionPct}%</Text>
-        <SymbolView name="chevron.up" size={16} tintColor={Colors.textMuted} />
+        <SymbolView name="chevron.up" size={16} tintColor={C.textMuted} />
       </View>
     </View>
   );
@@ -204,7 +200,6 @@ const collapse = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
     borderRadius: 16,
     height: 56,
     paddingHorizontal: 16,
@@ -223,8 +218,7 @@ const collapse = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary },
-  sub: { fontSize: 11, color: Colors.textMuted },
+  title: { fontSize: 14, fontWeight: '600' },
   right: {
     flex: 1,
     flexDirection: 'row',
@@ -236,7 +230,6 @@ const collapse = StyleSheet.create({
     width: 80,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.border,
     overflow: 'hidden',
   },
   progressFill: { height: '100%', borderRadius: 2 },
@@ -265,7 +258,7 @@ function ProgressFooter({
         <View style={[footer.badge, { backgroundColor: C.accentLight, borderColor: C.primaryEnd }]}>
           <Text style={[footer.badgeText, { color: C.primary }]}>{completedCells}/{totalCells} 완료</Text>
         </View>
-        <Text style={footer.sub}>빙고 {bingoCount}개 달성</Text>
+        <Text style={[footer.sub, { color: C.textMuted }]}>빙고 {bingoCount}개 달성</Text>
       </View>
       <Text style={[footer.pct, { color: C.primary }]}>{completionPct}%</Text>
     </View>
@@ -287,7 +280,7 @@ const footer = StyleSheet.create({
     borderWidth: 1,
   },
   badgeText: { fontSize: 12, fontWeight: '600' },
-  sub: { fontSize: 12, color: Colors.textMuted },
+  sub: { fontSize: 12 },
   pct: { fontSize: 20, fontWeight: '800' },
 });
 
@@ -334,15 +327,15 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.loadingContainer} edges={['top']}>
-        <Text style={styles.loadingText}>로딩중...</Text>
+      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: C.bg }]} edges={['top']}>
+        <Text style={[styles.loadingText, { color: C.textMuted }]}>로딩중...</Text>
       </SafeAreaView>
     );
   }
 
   if (boards.length === 0) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: C.bg }]} edges={['top']}>
         <EmptyBoardsState onPress={() => setSheetOpen(true)} />
         <CreateBoardSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} />
       </SafeAreaView>
@@ -353,7 +346,7 @@ export default function HomeScreen() {
   const today = formatDate();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: C.bg }]}>
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + Spacing.sm }]}
         showsVerticalScrollIndicator={false}
@@ -361,16 +354,16 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerDate}>{today}</Text>
+            <Text style={[styles.headerDate, { color: C.textSecondary }]}>{today}</Text>
             <View style={styles.boardSelector}>
-              <Text style={styles.boardSelectorName} numberOfLines={1}>
+              <Text style={[styles.boardSelectorName, { color: C.textPrimary }]} numberOfLines={1}>
                 {board?.title ?? '보드 선택'}
               </Text>
-              <SymbolView name="chevron.down" size={14} tintColor={Colors.textPrimary} />
+              <SymbolView name="chevron.down" size={14} tintColor={C.textPrimary} />
             </View>
           </View>
-          <View style={styles.notifBtn}>
-            <SymbolView name="bell" size={20} tintColor={Colors.textPrimary} />
+          <View style={[styles.notifBtn, { backgroundColor: C.white }]}>
+            <SymbolView name="bell" size={20} tintColor={C.textPrimary} />
           </View>
         </View>
 
@@ -389,7 +382,7 @@ export default function HomeScreen() {
                   colors={[C.primary, C.primaryEnd]}
                   style={[styles.boardChipActive, { shadowColor: C.primary }]}
                 >
-                  <Text style={styles.boardChipActiveText} numberOfLines={1}>{b.title}</Text>
+                  <Text style={[styles.boardChipActiveText, { color: C.white }]} numberOfLines={1}>{b.title}</Text>
                 </LinearGradient>
               );
             }
@@ -397,9 +390,9 @@ export default function HomeScreen() {
               <Pressable
                 key={b.id}
                 onPress={() => setSelectedBoardId(b.id)}
-                style={styles.boardChipInactive}
+                style={[styles.boardChipInactive, { backgroundColor: C.white, borderColor: C.border }]}
               >
-                <Text style={styles.boardChipInactiveText} numberOfLines={1}>{b.title}</Text>
+                <Text style={[styles.boardChipInactiveText, { color: C.textPrimary }]} numberOfLines={1}>{b.title}</Text>
               </Pressable>
             );
           })}
@@ -415,12 +408,12 @@ export default function HomeScreen() {
 
             {/* Section header */}
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>세부 목표 현황</Text>
+              <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>세부 목표 현황</Text>
               <Pressable
                 onPress={() => setViewMode('full')}
-                style={styles.sectionBtn}
+                style={[styles.sectionBtn, { backgroundColor: C.white }]}
               >
-                <Text style={styles.sectionBtnText}>전체 보기</Text>
+                <Text style={[styles.sectionBtnText, { color: C.textSecondary }]}>전체 보기</Text>
               </Pressable>
             </View>
 
@@ -477,17 +470,14 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: Colors.bg,
     alignItems: 'center',
     justifyContent: 'center',
   },
   loadingText: {
     fontSize: 14,
-    color: Colors.textMuted,
   },
   scroll: {
     paddingHorizontal: Spacing.xl,
@@ -501,7 +491,6 @@ const styles = StyleSheet.create({
   },
   headerDate: {
     fontSize: 12,
-    color: Colors.textSecondary,
     marginBottom: 3,
   },
   boardSelector: {
@@ -512,14 +501,12 @@ const styles = StyleSheet.create({
   boardSelectorName: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.textPrimary,
     maxWidth: 220,
   },
   notifBtn: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -545,15 +532,12 @@ const styles = StyleSheet.create({
   boardChipActiveText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.white,
   },
   boardChipInactive: {
     borderRadius: 16,
     paddingVertical: 10,
     paddingHorizontal: 14,
-    backgroundColor: Colors.white,
     borderWidth: 1,
-    borderColor: Colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -563,7 +547,6 @@ const styles = StyleSheet.create({
   boardChipInactiveText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.textPrimary,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -573,10 +556,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.textPrimary,
   },
   sectionBtn: {
-    backgroundColor: Colors.white,
     borderRadius: 10,
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -588,6 +569,5 @@ const styles = StyleSheet.create({
   },
   sectionBtnText: {
     fontSize: 12,
-    color: Colors.textSecondary,
   },
 });

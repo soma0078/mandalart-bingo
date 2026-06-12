@@ -1,6 +1,5 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import { SUB_GOAL_TO_GRID } from '@/utils/gridMapper';
 import type { BoardDetail } from '@/types/boards';
@@ -55,7 +54,7 @@ export function MiniGoalGrid({ board, onCellPress }: Props) {
                   colors={[C.primary, C.primaryEnd]}
                   style={[styles.cell, { shadowColor: C.primary }]}
                 >
-                  <Text style={styles.mainText} numberOfLines={2}>
+                  <Text style={[styles.mainText, { color: C.white }]} numberOfLines={2}>
                     {cell.title}
                   </Text>
                 </LinearGradient>
@@ -69,16 +68,17 @@ export function MiniGoalGrid({ board, onCellPress }: Props) {
                 style={({ pressed }) => [
                   styles.cell,
                   styles.cellDefault,
+                  { backgroundColor: C.white, borderColor: C.border },
                   cell?.isActive && { borderWidth: 1.5, borderColor: C.primaryEnd },
                   pressed && { opacity: 0.75 },
                 ]}
               >
                 {cell ? (
                   <>
-                    <Text style={[styles.cellText, cell.isActive && styles.cellTextActive]} numberOfLines={2}>
+                    <Text style={[styles.cellText, { color: C.textPrimary }]} numberOfLines={2}>
                       {cell.title}
                     </Text>
-                    <View style={styles.progressBg}>
+                    <View style={[styles.progressBg, { backgroundColor: C.border }]}>
                       <View
                         style={[
                           styles.progressFill,
@@ -88,7 +88,7 @@ export function MiniGoalGrid({ board, onCellPress }: Props) {
                     </View>
                   </>
                 ) : (
-                  <Text style={styles.emptyPlus}>+</Text>
+                  <Text style={[styles.emptyPlus, { color: C.border }]}>+</Text>
                 )}
               </Pressable>
             );
@@ -115,20 +115,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cellDefault: {
-    backgroundColor: Colors.white,
     borderWidth: 1,
-    borderColor: Colors.border,
   },
   cellActive: {},
-  cellText: { fontSize: 12, fontWeight: '500', color: Colors.textPrimary },
-  cellTextActive: { color: Colors.textPrimary },
-  mainText: { fontSize: 12, fontWeight: '700', color: Colors.white, textAlign: 'center' },
-  emptyPlus: { fontSize: 18, fontWeight: '300', color: Colors.border, textAlign: 'center' },
+  cellText: { fontSize: 12, fontWeight: '500' },
+  cellTextActive: {},
+  mainText: { fontSize: 12, fontWeight: '700', textAlign: 'center' },
+  emptyPlus: { fontSize: 18, fontWeight: '300', textAlign: 'center' },
   progressBg: {
     width: '100%',
     height: 3,
     borderRadius: 2,
-    backgroundColor: Colors.border,
     overflow: 'hidden',
     marginTop: 4,
   },

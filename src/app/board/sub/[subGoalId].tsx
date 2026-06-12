@@ -10,6 +10,7 @@ import {
   subGoalToCells,
   type BingoLine,
 } from "@/utils/gridMapper";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -29,6 +30,7 @@ type EditTarget =
   | null;
 
 export default function SubGoalViewer() {
+  const C = useThemeColors();
   const { subGoalId, boardId } = useLocalSearchParams<{
     subGoalId: string;
     boardId: string;
@@ -140,7 +142,7 @@ export default function SubGoalViewer() {
         : "";
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: C.bg }]} edges={["bottom"]}>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -158,8 +160,9 @@ export default function SubGoalViewer() {
                 key={index}
                 style={({ pressed }) => [
                   styles.cell,
-                  isCenter && styles.centerCell,
-                  cellData.isCompleted && !isCenter && styles.completedCell,
+                  { borderColor: C.border },
+                  isCenter && [styles.centerCell, { backgroundColor: C.textPrimary }],
+                  cellData.isCompleted && !isCenter && [styles.completedCell, { backgroundColor: C.accentLight, borderColor: C.accentBorder }],
                   pressed && styles.cellPressed,
                 ]}
                 onPress={() => handleCellTap(index)}
@@ -167,13 +170,14 @@ export default function SubGoalViewer() {
                 delayLongPress={400}
               >
                 {cellData.isCompleted && !isCenter && (
-                  <Text style={styles.checkmark}>✓</Text>
+                  <Text style={[styles.checkmark, { color: C.primary }]}>✓</Text>
                 )}
                 <Text
                   style={[
                     styles.cellText,
-                    isCenter && styles.centerCellText,
-                    cellData.isCompleted && !isCenter && styles.completedCellText,
+                    { color: C.textPrimary },
+                    isCenter && [styles.centerCellText, { color: C.white }],
+                    cellData.isCompleted && !isCenter && [styles.completedCellText, { color: C.primary }],
                   ]}
                   numberOfLines={3}
                 >
@@ -183,7 +187,7 @@ export default function SubGoalViewer() {
             );
           })}
         </View>
-        <Text style={styles.hint}>셀을 탭하면 완료 처리, 길게 누르면 텍스트를 수정할 수 있어요</Text>
+        <Text style={[styles.hint, { color: C.textMuted }]}>셀을 탭하면 완료 처리, 길게 누르면 텍스트를 수정할 수 있어요</Text>
       </View>
 
       <CellEditSheet
@@ -201,7 +205,6 @@ export default function SubGoalViewer() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fafafa",
   },
   content: {
     flex: 1,
@@ -217,7 +220,6 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
     alignItems: "center",
     justifyContent: "center",
     padding: 8,
@@ -226,34 +228,23 @@ const styles = StyleSheet.create({
   cellPressed: {
     opacity: 0.6,
   },
-  centerCell: {
-    backgroundColor: "#222",
-  },
-  completedCell: {
-    backgroundColor: "#f0faf0",
-    borderColor: "#b2dfb2",
-  },
+  centerCell: {},
+  completedCell: {},
   cellText: {
     fontSize: 12,
-    color: "#333",
     textAlign: "center",
   },
   centerCellText: {
-    color: "#fff",
     fontWeight: "600",
   },
-  completedCellText: {
-    color: "#2e7d32",
-  },
+  completedCellText: {},
   checkmark: {
     fontSize: 14,
-    color: "#2e7d32",
     fontWeight: "700",
   },
   hint: {
     marginTop: 20,
     fontSize: 12,
-    color: "#aaa",
     textAlign: "center",
   },
 });

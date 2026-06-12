@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { Colors, FontSize, Radius, Spacing } from '@/constants/theme';
+import { FontSize, Radius, Spacing } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 
 interface Props {
   title: string;
@@ -11,13 +12,15 @@ interface Props {
 }
 
 export function Card({ title, action, onAction, children, style }: Props) {
+  const C = useThemeColors();
+
   return (
-    <View style={[styles.card, style]}>
+    <View style={[styles.card, { backgroundColor: C.white, borderColor: C.border }, style]}>
       <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, { color: C.textPrimary }]}>{title}</Text>
         {action != null && (
           <Pressable onPress={onAction}>
-            <Text style={styles.action}>{action}</Text>
+            <Text style={[styles.action, { color: C.textMuted }]}>{action}</Text>
           </Pressable>
         )}
       </View>
@@ -28,12 +31,10 @@ export function Card({ title, action, onAction, children, style }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.white,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
     gap: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.04,
@@ -48,10 +49,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSize.heading,
     fontWeight: '700',
-    color: Colors.textPrimary,
   },
   action: {
     fontSize: FontSize.caption,
-    color: Colors.textMuted,
   },
 });

@@ -1,7 +1,6 @@
 import { View, Text, StyleSheet, type DimensionValue } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
-import { Colors } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import type { BoardDetail } from '@/types/boards';
 
@@ -30,7 +29,7 @@ export function HeroCard({ subGoal, boardTitle }: Props) {
     >
       <View style={styles.chipRow}>
         <View style={styles.focusChip}>
-          <Text style={styles.focusChipText}>{boardTitle}</Text>
+          <Text style={[styles.focusChipText, { color: C.white }]}>{boardTitle}</Text>
         </View>
         <View style={styles.autoTag}>
           <Text style={styles.autoTagText}>집중 중</Text>
@@ -42,10 +41,10 @@ export function HeroCard({ subGoal, boardTitle }: Props) {
       <View style={styles.titleRow}>
         <View style={{ gap: 3 }}>
           <Text style={styles.titleSub}>세부 목표</Text>
-          <Text style={styles.title}>{subGoal.title}</Text>
+          <Text style={[styles.title, { color: C.white }]}>{subGoal.title}</Text>
         </View>
         <View style={styles.ring}>
-          <Text style={styles.ringPct}>{pct}%</Text>
+          <Text style={[styles.ringPct, { color: C.white }]}>{pct}%</Text>
         </View>
       </View>
 
@@ -55,7 +54,7 @@ export function HeroCard({ subGoal, boardTitle }: Props) {
         {sorted.length > 0 ? (
           sorted.map((cell) => (
             <View key={cell.id} style={styles.actionItem}>
-              <View style={[styles.checkbox, cell.is_completed && styles.checkboxDone]}>
+              <View style={[styles.checkbox, cell.is_completed && { backgroundColor: C.white, borderColor: C.white }]}>
                 {cell.is_completed && (
                   <Text style={{ fontSize: 9, color: C.primary, fontWeight: '700' }}>✓</Text>
                 )}
@@ -76,7 +75,7 @@ export function HeroCard({ subGoal, boardTitle }: Props) {
       <View style={{ height: 14 }} />
 
       <View style={styles.progressBg}>
-        <View style={[styles.progressFill, { width: `${pct}%` as DimensionValue }]} />
+        <View style={[styles.progressFill, { width: `${pct}%` as DimensionValue, backgroundColor: C.white }]} />
       </View>
     </LinearGradient>
   );
@@ -102,7 +101,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 12,
   },
-  focusChipText: { fontSize: 12, color: Colors.white, fontWeight: '500' },
+  focusChipText: { fontSize: 12, fontWeight: '500' },
   autoTag: {
     backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 16,
@@ -116,7 +115,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   titleSub: { fontSize: 12, color: 'rgba(255,255,255,0.7)' },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.white },
+  title: { fontSize: 24, fontWeight: '700' },
   ring: {
     width: 64,
     height: 64,
@@ -125,7 +124,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ringPct: { fontSize: 16, fontWeight: '800', color: Colors.white },
+  ringPct: { fontSize: 16, fontWeight: '800' },
   actionItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   checkbox: {
     width: 18,
@@ -136,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkboxDone: { backgroundColor: Colors.white, borderColor: Colors.white },
+  checkboxDone: {},
   actionText: { fontSize: 14, color: 'rgba(255,255,255,0.9)', flex: 1 },
   actionTextDone: { color: 'rgba(255,255,255,0.55)' },
   emptyText: { fontSize: 13, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' },
@@ -146,5 +145,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.3)',
     overflow: 'hidden',
   },
-  progressFill: { height: '100%', borderRadius: 3, backgroundColor: Colors.white },
+  progressFill: { height: '100%', borderRadius: 3 },
 });

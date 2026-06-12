@@ -12,7 +12,7 @@ import { detectBingos } from '@/utils/gridMapper';
 import { CACHE_KEYS } from '@/constants/cacheKeys';
 import { CreateBoardSheet } from '@/components/CreateBoardSheet';
 import { EmptyBoardsState } from '@/components/EmptyBoardsState';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import type { BoardDetail } from '@/types/boards';
 
@@ -45,15 +45,15 @@ function BoardCard({ board, pct, bingoCount, onPress }: {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [card.container, pressed && { opacity: 0.85 }]}
+      style={({ pressed }) => [card.container, { backgroundColor: C.white }, pressed && { opacity: 0.85 }]}
     >
       {/* 상단 */}
       <View style={card.top}>
         <View style={card.left}>
           <View style={card.nameRow}>
-            <Text style={card.name} numberOfLines={1}>{board.title}</Text>
+            <Text style={[card.name, { color: C.textPrimary }]} numberOfLines={1}>{board.title}</Text>
           </View>
-          <Text style={card.date}>{formatDate(board.created_at)}</Text>
+          <Text style={[card.date, { color: C.textMuted }]}>{formatDate(board.created_at)}</Text>
         </View>
         <View style={card.right}>
           <View style={[
@@ -67,7 +67,7 @@ function BoardCard({ board, pct, bingoCount, onPress }: {
               {isDone ? '완료' : '진행중'}
             </Text>
           </View>
-          <SymbolView name="chevron.right" size={16} tintColor={Colors.border} />
+          <SymbolView name="chevron.right" size={16} tintColor={C.border} />
         </View>
       </View>
 
@@ -93,19 +93,19 @@ function BoardCard({ board, pct, bingoCount, onPress }: {
       {/* 하단 통계 */}
       <View style={card.stats}>
         <Text style={[card.statPct, isDone ? card.statPctDone : { color: C.primary }]}>{pct}% 달성</Text>
-        <Text style={card.statBingo}>빙고 {bingoCount}개</Text>
+        <Text style={[card.statBingo, { color: C.textMuted }]}>빙고 {bingoCount}개</Text>
       </View>
     </Pressable>
   );
 }
 
 const card = StyleSheet.create({
-  container: { backgroundColor: Colors.white, borderRadius: 20, padding: 18, gap: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3 },
+  container: { borderRadius: 20, padding: 18, gap: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   left: { gap: 4, flex: 1, marginRight: 12 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  name: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
-  date: { fontSize: 12, color: Colors.textMuted },
+  name: { fontSize: 15, fontWeight: '700' },
+  date: { fontSize: 12 },
   right: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   badge: { borderRadius: 10, paddingVertical: 4, paddingHorizontal: 10 },
   badgeDone: { backgroundColor: '#F0FFF4' },
@@ -116,7 +116,7 @@ const card = StyleSheet.create({
   stats: { flexDirection: 'row', gap: 16 },
   statPct: { fontSize: 12, fontWeight: '600' },
   statPctDone: { color: '#10B981' },
-  statBingo: { fontSize: 12, color: Colors.textMuted },
+  statBingo: { fontSize: 12 },
 });
 
 // ─── 메인 ─────────────────────────────────────────────────
@@ -154,18 +154,18 @@ export default function ListScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <Text style={styles.loading}>로딩중...</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: C.bg }]} edges={['top']}>
+        <Text style={[styles.loading, { color: C.textMuted }]}>로딩중...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: C.bg }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* 헤더 */}
         <View style={styles.header}>
-          <Text style={styles.title}>내역</Text>
+          <Text style={[styles.title, { color: C.textPrimary }]}>내역</Text>
           <Pressable onPress={() => setSheetOpen(true)}>
             <LinearGradient
               colors={[C.primary, C.primaryEnd]}
@@ -173,8 +173,8 @@ export default function ListScreen() {
               end={{ x: 0, y: 1 }}
               style={[styles.newBtn, { shadowColor: C.primary }]}
             >
-              <SymbolView name="plus" size={16} tintColor={Colors.white} />
-              <Text style={styles.newBtnText}>새로 만들기</Text>
+              <SymbolView name="plus" size={16} tintColor={C.white} />
+              <Text style={[styles.newBtnText, { color: C.white }]}>새로 만들기</Text>
             </LinearGradient>
           </Pressable>
         </View>
@@ -185,9 +185,17 @@ export default function ListScreen() {
             <Pressable
               key={f}
               onPress={() => setFilter(f)}
-              style={[styles.filterPill, filter === f && styles.filterPillActive]}
+              style={[
+                styles.filterPill,
+                { backgroundColor: C.white, borderColor: C.border },
+                filter === f && { backgroundColor: C.textPrimary, borderColor: C.textPrimary },
+              ]}
             >
-              <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>{f}</Text>
+              <Text style={[
+                styles.filterText,
+                { color: C.textSecondary },
+                filter === f && styles.filterTextActive,
+              ]}>{f}</Text>
             </Pressable>
           ))}
         </View>
@@ -197,7 +205,7 @@ export default function ListScreen() {
           <EmptyBoardsState onPress={() => setSheetOpen(true)} />
         ) : filtered.length === 0 ? (
           <View style={styles.emptyFilter}>
-            <Text style={styles.emptyFilterText}>해당하는 만다라트가 없어요</Text>
+            <Text style={[styles.emptyFilterText, { color: C.textMuted }]}>해당하는 만다라트가 없어요</Text>
           </View>
         ) : (
           <View style={styles.cardList}>
@@ -222,19 +230,18 @@ export default function ListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
+  container: { flex: 1 },
   scroll: { paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, gap: Spacing.xl },
-  loading: { textAlign: 'center', marginTop: 40, color: Colors.textMuted },
+  loading: { textAlign: 'center', marginTop: 40 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
+  title: { fontSize: 24, fontWeight: '700' },
   newBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 20, paddingVertical: 10, paddingHorizontal: 16, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
-  newBtnText: { fontSize: 13, fontWeight: '600', color: Colors.white },
+  newBtnText: { fontSize: 13, fontWeight: '600' },
   filterRow: { flexDirection: 'row', gap: 8 },
-  filterPill: { borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.border },
-  filterPillActive: { backgroundColor: Colors.textPrimary, borderColor: Colors.textPrimary },
-  filterText: { fontSize: 13, color: Colors.textSecondary },
-  filterTextActive: { fontWeight: '600', color: Colors.white },
+  filterPill: { borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16, borderWidth: 1 },
+  filterText: { fontSize: 13 },
+  filterTextActive: { fontWeight: '600', color: '#FFFFFF' },
   cardList: { gap: 16 },
   emptyFilter: { paddingVertical: 60, alignItems: 'center' },
-  emptyFilterText: { fontSize: 14, color: Colors.textMuted },
+  emptyFilterText: { fontSize: 14 },
 });

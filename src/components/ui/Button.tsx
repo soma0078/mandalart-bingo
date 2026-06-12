@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
-import { Colors, FontSize, Radius } from '@/constants/theme';
+import { FontSize, Radius } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 
 type Variant = 'primary' | 'secondary' | 'destructive';
@@ -34,7 +34,7 @@ export function Button({ label, onPress, variant = 'primary', disabled, style }:
           end={{ x: 1, y: 0 }}
           style={styles.primaryGradient}
         >
-          <Text style={styles.primaryLabel}>{label}</Text>
+          <Text style={[styles.primaryLabel, { color: C.white }]}>{label}</Text>
         </LinearGradient>
       </Pressable>
     );
@@ -46,7 +46,9 @@ export function Button({ label, onPress, variant = 'primary', disabled, style }:
       disabled={disabled}
       style={({ pressed }) => [
         styles.base,
-        variant === 'secondary' ? styles.secondary : null,
+        variant === 'secondary'
+          ? { backgroundColor: C.white, borderWidth: 1.5, borderColor: C.border }
+          : null,
         variant === 'destructive'
           ? { backgroundColor: C.accentLight, borderWidth: 1, borderColor: C.accentBorder }
           : null,
@@ -57,7 +59,9 @@ export function Button({ label, onPress, variant = 'primary', disabled, style }:
     >
       <Text
         style={[
-          variant === 'secondary' ? styles.secondaryLabel : styles.destructiveLabel,
+          variant === 'secondary'
+            ? [styles.secondaryLabel, { color: C.textSecondary }]
+            : styles.destructiveLabel,
           variant === 'destructive' && { color: C.primary },
         ]}
       >
@@ -85,7 +89,6 @@ const styles = StyleSheet.create({
   primaryLabel: {
     fontSize: FontSize.body,
     fontWeight: '700',
-    color: Colors.white,
   },
   base: {
     borderRadius: Radius.full,
@@ -93,16 +96,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     alignItems: 'center',
   },
-  secondary: {
-    backgroundColor: Colors.white,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-  },
   disabledBase: { opacity: 0.5 },
   secondaryLabel: {
     fontSize: FontSize.body,
     fontWeight: '600',
-    color: Colors.textSecondary,
   },
   destructiveLabel: {
     fontSize: FontSize.body,

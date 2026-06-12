@@ -8,7 +8,8 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 
 interface Props {
   visible: boolean;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function BottomSheet({ visible, onClose, children }: Props) {
+  const C = useThemeColors();
   const translateY = useRef(new Animated.Value(500)).current;
 
   useEffect(() => {
@@ -47,9 +49,9 @@ export function BottomSheet({ visible, onClose, children }: Props) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <Pressable style={styles.backdrop} onPress={onClose} />
-        <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
+        <Animated.View style={[styles.sheet, { backgroundColor: C.white, transform: [{ translateY }] }]}>
           <View style={styles.handleRow}>
-            <View style={styles.handle} />
+            <View style={[styles.handle, { backgroundColor: C.border }]} />
           </View>
           {children}
         </Animated.View>
@@ -68,7 +70,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   sheet: {
-    backgroundColor: Colors.white,
     borderTopLeftRadius: Radius.xl,
     borderTopRightRadius: Radius.xl,
     paddingHorizontal: Spacing['2xl'],
@@ -88,6 +89,5 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.border,
   },
 });

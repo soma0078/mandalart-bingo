@@ -1,7 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { FullGridCell } from '@/utils/gridMapper';
-import { Colors } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 
 const CELL_SIZE = 30;
@@ -11,11 +10,11 @@ interface Props {
   onCellPress?: (gridIndex: number) => void;
 }
 
-function getBlockBg(globalIndex: number): string {
+function getBlockBg(globalIndex: number, white: string): string {
   const blockRow = Math.floor(Math.floor(globalIndex / 9) / 3);
   const blockCol = Math.floor((globalIndex % 9) / 3);
   if (blockRow === 1 && blockCol === 1) return '#F8F9FC';
-  return (blockRow + blockCol) % 2 === 0 ? '#FAFAFA' : Colors.white;
+  return (blockRow + blockCol) % 2 === 0 ? '#FAFAFA' : white;
 }
 
 export function MandalaGrid9x9({ fullGrid, onCellPress }: Props) {
@@ -36,11 +35,11 @@ export function MandalaGrid9x9({ fullGrid, onCellPress }: Props) {
                 styles.cell,
                 {
                   backgroundColor: isCenter
-                    ? Colors.textPrimary
+                    ? C.textPrimary
                     : isCompleted
                     ? C.accentLight
-                    : getBlockBg(index),
-                  borderColor: isCompleted ? C.accentBorder : Colors.border,
+                    : getBlockBg(index, C.white),
+                  borderColor: isCompleted ? C.accentBorder : C.border,
                 },
                 onCellPress && pressed && styles.cellPressed,
               ]}
@@ -51,7 +50,8 @@ export function MandalaGrid9x9({ fullGrid, onCellPress }: Props) {
               <Text
                 style={[
                   styles.cellText,
-                  isCenter && styles.centerText,
+                  { color: C.textSecondary },
+                  isCenter && [styles.centerText, { color: C.white }],
                   isCompleted && [styles.completedText, { color: C.primary }],
                 ]}
                 numberOfLines={2}
@@ -88,11 +88,9 @@ const styles = StyleSheet.create({
   cellPressed: { opacity: 0.6 },
   cellText: {
     fontSize: 8,
-    color: Colors.textSecondary,
     textAlign: 'center',
   },
   centerText: {
-    color: Colors.white,
     fontWeight: '600',
     fontSize: 9,
   },

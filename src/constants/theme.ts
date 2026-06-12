@@ -1,4 +1,4 @@
-export const Colors = {
+export const LightColors = {
   primary: '#FF5F6D',
   primaryEnd: '#FF8953',
   bg: '#EEF0FF',
@@ -16,6 +16,28 @@ export const Colors = {
   accentBorder: '#FFD0C8',
   accentLight: '#FFF0EC',
 } as const;
+
+export const DarkColors = {
+  primary: '#FF5F6D',
+  primaryEnd: '#FF8953',
+  bg: '#0F0F18',
+  border: '#2D2D3F',
+  cellDone: '#FF8953',
+  cellUndone: '#2D2D3F',
+  inputBg: '#1A1A2E',
+  success: '#10B981',
+  warning: '#F59E0B',
+  purple: '#8B5CF6',
+  textPrimary: '#F1F2F6',
+  textSecondary: '#9CA3AF',
+  textMuted: '#6B7280',
+  white: '#1C1C2E',
+  accentBorder: '#FFD0C8',
+  accentLight: '#FFF0EC',
+} as const;
+
+// 기본값(라이트)으로 내보내기 — 하위 호환성 유지
+export const Colors = LightColors;
 
 export const FontSize = {
   display: 28,

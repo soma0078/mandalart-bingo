@@ -4,7 +4,8 @@ import { boardToCells, isCenterCell } from '@/utils/gridMapper';
 import { StyleSheet, Text, View } from 'react-native';
 import { Cell } from '@/components/ui/Cell';
 import type { CellVariant } from '@/components/ui/Cell';
-import { Colors, FontSize, Spacing } from '@/constants/theme';
+import { FontSize, Spacing } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 
 const CELL_SIZE = 100;
 const CELL_GAP = 6;
@@ -21,12 +22,13 @@ function getCellVariant(text: string | null, isCenter: boolean): CellVariant {
 }
 
 export function MandalaGrid3x3({ id, onCellPress }: Props) {
+  const C = useThemeColors();
   const { data: board } = useGetBoardById(id);
   const cells = boardToCells(board);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{board?.title}</Text>
+      <Text style={[styles.title, { color: C.textPrimary }]}>{board?.title}</Text>
       <View style={styles.grid}>
         {cells.map((text, index) => (
           <Cell
@@ -50,7 +52,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSize.heading,
     fontWeight: '700',
-    color: Colors.textPrimary,
   },
   grid: {
     flexDirection: 'row',

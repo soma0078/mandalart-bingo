@@ -8,7 +8,7 @@ import { useGertBoards } from '@/hooks/useGetBoards';
 import { getBoardById } from '@/lib/boards';
 import { detectBingos } from '@/utils/gridMapper';
 import { CACHE_KEYS } from '@/constants/cacheKeys';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import type { BoardDetail } from '@/types/boards';
 
@@ -104,13 +104,13 @@ const hero = StyleSheet.create({
   label: { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
   row: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   left: { gap: 4 },
-  pct: { fontSize: 48, fontWeight: '800', color: Colors.white, lineHeight: 52 },
+  pct: { fontSize: 48, fontWeight: '800', color: '#FFFFFF', lineHeight: 52 },
   sub: { fontSize: 12, color: 'rgba(255,255,255,0.7)' },
   badge: { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 16, padding: 16, alignItems: 'center', gap: 4 },
-  badgeNum: { fontSize: 24, fontWeight: '800', color: Colors.white },
+  badgeNum: { fontSize: 24, fontWeight: '800', color: '#FFFFFF' },
   badgeLabel: { fontSize: 11, color: 'rgba(255,255,255,0.8)' },
   pbBg: { height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.3)', overflow: 'hidden' },
-  pbFill: { height: '100%', borderRadius: 4, backgroundColor: Colors.white },
+  pbFill: { height: '100%', borderRadius: 4, backgroundColor: '#FFFFFF' },
 });
 
 function BarChart({ data, labels }: { data: number[]; labels: string[] }) {
@@ -129,11 +129,11 @@ function BarChart({ data, labels }: { data: number[]; labels: string[] }) {
             <View style={chart.barBg}>
               <View style={[
                 chart.bar,
-                { height: barHeight },
+                { height: barHeight, backgroundColor: C.border },
                 isToday && { backgroundColor: C.primary },
               ]} />
             </View>
-            <Text style={[chart.label, isToday && { color: C.primary, fontWeight: '700' }]}>{labels[i]}</Text>
+            <Text style={[chart.label, { color: C.textMuted }, isToday && { color: C.primary, fontWeight: '700' }]}>{labels[i]}</Text>
           </View>
         );
       })}
@@ -145,28 +145,29 @@ const chart = StyleSheet.create({
   bars: { flexDirection: 'row', alignItems: 'flex-end', height: 100, gap: 8 },
   col: { flex: 1, alignItems: 'center', gap: 4 },
   barBg: { flex: 1, justifyContent: 'flex-end', width: '100%', alignItems: 'center' },
-  bar: { width: '60%', borderRadius: 4, backgroundColor: Colors.border },
-  label: { fontSize: 11, color: Colors.textMuted },
+  bar: { width: '60%', borderRadius: 4 },
+  label: { fontSize: 11 },
 });
 
 function BoardRow({ title, pct, color }: { title: string; pct: number; color: string }) {
+  const C = useThemeColors();
   return (
-    <View style={row.card}>
-      <View style={row.top}>
-        <Text style={row.name}>{title}</Text>
-        <Text style={[row.pct, { color }]}>{pct}%</Text>
+    <View style={[boardRow.card, { backgroundColor: C.white }]}>
+      <View style={boardRow.top}>
+        <Text style={[boardRow.name, { color: C.textPrimary }]}>{title}</Text>
+        <Text style={[boardRow.pct, { color }]}>{pct}%</Text>
       </View>
-      <View style={row.pbBg}>
-        <View style={[row.pbFill, { width: `${pct}%` as any, backgroundColor: color }]} />
+      <View style={boardRow.pbBg}>
+        <View style={[boardRow.pbFill, { width: `${pct}%` as any, backgroundColor: color }]} />
       </View>
     </View>
   );
 }
 
-const row = StyleSheet.create({
-  card: { backgroundColor: Colors.white, borderRadius: 16, padding: 16, gap: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
+const boardRow = StyleSheet.create({
+  card: { borderRadius: 16, padding: 16, gap: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  name: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary },
+  name: { fontSize: 14, fontWeight: '600' },
   pct: { fontSize: 14, fontWeight: '700' },
   pbBg: { height: 6, borderRadius: 3, backgroundColor: '#F3F4F6', overflow: 'hidden' },
   pbFill: { height: '100%', borderRadius: 3 },
@@ -179,7 +180,7 @@ export default function StatsScreen() {
   const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
   const { data: boards = [] } = useGertBoards();
 
-  const BOARD_COLORS = [C.primary, Colors.purple, Colors.warning, Colors.success, '#06B6D4', '#EC4899'];
+  const BOARD_COLORS = [C.primary, C.purple, C.warning, C.success, '#06B6D4', '#EC4899'];
 
   const boardDetails = useQueries({
     queries: boards.map((b) => ({
@@ -238,9 +239,9 @@ export default function StatsScreen() {
   const chartSubLabel = period === 'weekly' ? '이번 주 달성 현황' : '이번 달 주차별 달성 현황';
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: C.bg }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>통계</Text>
+        <Text style={[styles.title, { color: C.textPrimary }]}>통계</Text>
 
         <HeroCard
           pct={overallPct}
@@ -250,32 +251,32 @@ export default function StatsScreen() {
         />
 
         {/* 기간별 달성 */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: C.white }]}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>기간별 달성</Text>
+            <Text style={[styles.cardTitle, { color: C.textPrimary }]}>기간별 달성</Text>
             <View style={styles.toggle}>
               <Pressable
                 onPress={() => setPeriod('weekly')}
-                style={[styles.togglePill, period === 'weekly' && styles.togglePillActive]}
+                style={[styles.togglePill, period === 'weekly' && [styles.togglePillActive, { backgroundColor: C.white }]]}
               >
-                <Text style={[styles.toggleText, period === 'weekly' && styles.toggleTextActive]}>주간</Text>
+                <Text style={[styles.toggleText, { color: C.textMuted }, period === 'weekly' && [styles.toggleTextActive, { color: C.textPrimary }]]}>주간</Text>
               </Pressable>
               <Pressable
                 onPress={() => setPeriod('monthly')}
-                style={[styles.togglePill, period === 'monthly' && styles.togglePillActive]}
+                style={[styles.togglePill, period === 'monthly' && [styles.togglePillActive, { backgroundColor: C.white }]]}
               >
-                <Text style={[styles.toggleText, period === 'monthly' && styles.toggleTextActive]}>월간</Text>
+                <Text style={[styles.toggleText, { color: C.textMuted }, period === 'monthly' && [styles.toggleTextActive, { color: C.textPrimary }]]}>월간</Text>
               </Pressable>
             </View>
           </View>
-          <Text style={styles.chartLabel}>{chartSubLabel}</Text>
+          <Text style={[styles.chartLabel, { color: C.textMuted }]}>{chartSubLabel}</Text>
           <BarChart data={chartData.counts} labels={chartData.labels} />
         </View>
 
         {/* 만다라트별 진행률 */}
         {boardStats.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>만다라트별 진행률</Text>
+            <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>만다라트별 진행률</Text>
             {boardStats.map((b) => (
               <BoardRow key={b.title} title={b.title} pct={b.pct} color={b.color} />
             ))}
@@ -289,18 +290,18 @@ export default function StatsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
+  container: { flex: 1 },
   scroll: { paddingHorizontal: Spacing.xl, paddingTop: Spacing.sm, gap: Spacing.xl },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
-  card: { backgroundColor: Colors.white, borderRadius: 20, padding: 20, gap: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 3 },
+  title: { fontSize: 24, fontWeight: '700' },
+  card: { borderRadius: 20, padding: 20, gap: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 3 },
   cardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: Colors.textPrimary },
+  cardTitle: { fontSize: 16, fontWeight: '700' },
   toggle: { flexDirection: 'row', backgroundColor: '#E5E7EB', borderRadius: 12, padding: 3, gap: 2 },
   togglePill: { borderRadius: 9, paddingVertical: 5, paddingHorizontal: 14 },
-  togglePillActive: { backgroundColor: Colors.white, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
-  toggleText: { fontSize: 13, color: Colors.textMuted },
-  toggleTextActive: { fontWeight: '600', color: Colors.textPrimary },
-  chartLabel: { fontSize: 13, color: Colors.textMuted },
+  togglePillActive: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
+  toggleText: { fontSize: 13 },
+  toggleTextActive: { fontWeight: '600' },
+  chartLabel: { fontSize: 13 },
   section: { gap: 10 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.textPrimary },
+  sectionTitle: { fontSize: 16, fontWeight: '700' },
 });

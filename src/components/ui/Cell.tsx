@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Colors, FontSize, Radius } from '@/constants/theme';
+import { FontSize, Radius } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
 
 export type CellVariant = 'default' | 'core' | 'completed' | 'empty';
@@ -25,7 +25,7 @@ export function Cell({ label, variant = 'default', onPress, size = 100 }: Props)
         end={{ x: 1, y: 1 }}
         style={[styles.base, styles.coreShadow, { shadowColor: C.primary }, cellStyle]}
       >
-        <Text style={[styles.coreLabel, { width: textWidth }]} numberOfLines={3}>
+        <Text style={[styles.coreLabel, { color: C.white, width: textWidth }]} numberOfLines={3}>
           {label ?? ''}
         </Text>
       </LinearGradient>
@@ -34,10 +34,11 @@ export function Cell({ label, variant = 'default', onPress, size = 100 }: Props)
         style={[
           styles.base,
           styles.defaultShadow,
+          { backgroundColor: C.white },
           cellStyle,
           variant === 'completed'
             ? { borderWidth: 1.5, borderColor: C.primary }
-            : styles.defaultBorder,
+            : { borderWidth: 1, borderColor: C.border },
         ]}
       >
         {variant === 'completed' && (
@@ -47,13 +48,15 @@ export function Cell({ label, variant = 'default', onPress, size = 100 }: Props)
         )}
         {variant === 'empty' ? (
           <>
-            <Text style={styles.emptyPlus}>+</Text>
-            <Text style={styles.emptyHint}>탭해서 입력</Text>
+            <Text style={[styles.emptyPlus, { color: C.border }]}>+</Text>
+            <Text style={[styles.emptyHint, { color: C.textMuted }]}>탭해서 입력</Text>
           </>
         ) : (
           <Text
             style={[
-              variant === 'completed' ? styles.completedLabel : styles.defaultLabel,
+              variant === 'completed'
+                ? [styles.completedLabel, { color: C.textSecondary }]
+                : [styles.defaultLabel, { color: C.textPrimary }],
               { width: textWidth },
             ]}
             numberOfLines={3}
@@ -82,7 +85,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   defaultShadow: {
-    backgroundColor: Colors.white,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -95,26 +97,19 @@ const styles = StyleSheet.create({
     shadowRadius: 7,
     elevation: 4,
   },
-  defaultBorder: {
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
   defaultLabel: {
     fontSize: FontSize.caption,
     fontWeight: '500',
-    color: Colors.textPrimary,
     textAlign: 'center',
   },
   coreLabel: {
     fontSize: FontSize.caption,
     fontWeight: '700',
-    color: Colors.white,
     textAlign: 'center',
   },
   completedLabel: {
     fontSize: FontSize.label,
     fontWeight: '500',
-    color: Colors.textSecondary,
     textAlign: 'center',
   },
   checkBadge: {
@@ -132,10 +127,8 @@ const styles = StyleSheet.create({
   emptyPlus: {
     fontSize: FontSize.title,
     fontWeight: '300',
-    color: Colors.border,
   },
   emptyHint: {
     fontSize: 10,
-    color: Colors.textMuted,
   },
 });
