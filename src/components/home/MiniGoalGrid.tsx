@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 import { SUB_GOAL_TO_GRID } from '@/utils/gridMapper';
 import type { BoardDetail } from '@/types/boards';
 
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function MiniGoalGrid({ board, onCellPress }: Props) {
+  const C = useThemeColors();
   const cells: (MiniCellData | null)[] = Array(9).fill(null);
 
   if (board) {
@@ -50,8 +52,8 @@ export function MiniGoalGrid({ board, onCellPress }: Props) {
               return (
                 <LinearGradient
                   key={idx}
-                  colors={[Colors.primary, Colors.primaryEnd]}
-                  style={[styles.cell, { shadowColor: Colors.primary }]}
+                  colors={[C.primary, C.primaryEnd]}
+                  style={[styles.cell, { shadowColor: C.primary }]}
                 >
                   <Text style={styles.mainText} numberOfLines={2}>
                     {cell.title}
@@ -67,7 +69,7 @@ export function MiniGoalGrid({ board, onCellPress }: Props) {
                 style={({ pressed }) => [
                   styles.cell,
                   styles.cellDefault,
-                  cell?.isActive && styles.cellActive,
+                  cell?.isActive && { borderWidth: 1.5, borderColor: C.primaryEnd },
                   pressed && { opacity: 0.75 },
                 ]}
               >
@@ -77,7 +79,12 @@ export function MiniGoalGrid({ board, onCellPress }: Props) {
                       {cell.title}
                     </Text>
                     <View style={styles.progressBg}>
-                      <View style={[styles.progressFill, { width: `${cell.pct}%` as any }]} />
+                      <View
+                        style={[
+                          styles.progressFill,
+                          { width: `${cell.pct}%` as any, backgroundColor: C.primaryEnd },
+                        ]}
+                      />
                     </View>
                   </>
                 ) : (
@@ -112,10 +119,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  cellActive: {
-    borderWidth: 1.5,
-    borderColor: Colors.primaryEnd,
-  },
+  cellActive: {},
   cellText: { fontSize: 12, fontWeight: '500', color: Colors.textPrimary },
   cellTextActive: { color: Colors.textPrimary },
   mainText: { fontSize: 12, fontWeight: '700', color: Colors.white, textAlign: 'center' },
@@ -131,6 +135,5 @@ const styles = StyleSheet.create({
   progressFill: {
     height: '100%',
     borderRadius: 2,
-    backgroundColor: Colors.primaryEnd,
   },
 });

@@ -1,5 +1,6 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 import type { FullGridCell } from '@/utils/gridMapper';
 
 const BLOCK_BG = '#FFFFFF';
@@ -10,6 +11,8 @@ interface Props {
 }
 
 export function HomeGrid9x9({ fullGrid, onCellPress }: Props) {
+  const C = useThemeColors();
+
   return (
     <View style={{ gap: 3 }}>
       {[0, 1, 2].map((br) => (
@@ -34,9 +37,9 @@ export function HomeGrid9x9({ fullGrid, onCellPress }: Props) {
                           onPress={() => onCellPress?.(gi)}
                           style={({ pressed }) => [
                             styles.cell,
-                            isCompleted && styles.cellCompleted,
+                            isCompleted && { backgroundColor: C.primaryEnd },
                             isSubGoalCenter && styles.cellSubGoal,
-                            isMainGoal && styles.cellMain,
+                            isMainGoal && { backgroundColor: C.primary },
                             pressed && { opacity: 0.7 },
                           ]}
                         >
@@ -81,9 +84,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 2,
   },
-  cellCompleted: { backgroundColor: Colors.primaryEnd },
   cellSubGoal: { backgroundColor: 'rgba(0,0,0,0.06)' },
-  cellMain: { backgroundColor: Colors.primary },
   cellText: { fontSize: 7, color: Colors.textSecondary, textAlign: 'center' },
   cellCompletedText: { color: Colors.white, fontWeight: '500' },
   cellSubGoalText: { fontSize: 7, color: Colors.textPrimary, fontWeight: '600' },

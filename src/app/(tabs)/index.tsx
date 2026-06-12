@@ -25,6 +25,7 @@ import { useCellNavigation } from '@/utils/cellNavigation';
 import { CreateBoardSheet } from '@/components/CreateBoardSheet';
 import { EmptyBoardsState } from '@/components/EmptyBoardsState';
 import { Colors, Spacing, Radius } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 import type { Board, BoardDetail } from '@/types/boards';
 
 // ─── Helpers ──────────────────────────────────────────────
@@ -51,12 +52,13 @@ function formatDate(): string {
 // ─── ViewSegment ──────────────────────────────────────────
 
 function ViewSegment({ mode, onToggle }: { mode: 'brief' | 'full'; onToggle: () => void }) {
+  const C = useThemeColors();
   const isBrief = mode === 'brief';
 
   return (
     <View style={seg.container}>
       {isBrief ? (
-        <LinearGradient colors={[Colors.primary, Colors.primaryEnd]} style={seg.button}>
+        <LinearGradient colors={[C.primary, C.primaryEnd]} style={seg.button}>
           <SymbolView name="square.grid.2x2.fill" size={14} tintColor={Colors.white} />
           <Text style={[seg.text, seg.textActive]}>간략히</Text>
         </LinearGradient>
@@ -67,7 +69,7 @@ function ViewSegment({ mode, onToggle }: { mode: 'brief' | 'full'; onToggle: () 
         </Pressable>
       )}
       {!isBrief ? (
-        <LinearGradient colors={[Colors.primary, Colors.primaryEnd]} style={seg.button}>
+        <LinearGradient colors={[C.primary, C.primaryEnd]} style={seg.button}>
           <SymbolView name="square.grid.3x3.fill" size={14} tintColor={Colors.white} />
           <Text style={[seg.text, seg.textActive]}>전체</Text>
         </LinearGradient>
@@ -124,9 +126,11 @@ function StatsRow({
   completionPct: number;
   bingoCount: number;
 }) {
+  const C = useThemeColors();
+
   const items = [
     { sym: 'flame.fill' as const, value: `${streak}일 연속`, label: '스트릭', color: '#F97316' },
-    { sym: 'checkmark.circle.fill' as const, value: `${completionPct}%`, label: '전체 달성', color: Colors.primary },
+    { sym: 'checkmark.circle.fill' as const, value: `${completionPct}%`, label: '전체 달성', color: C.primary },
     { sym: 'trophy.fill' as const, value: `빙고 ${bingoCount}개`, label: '이번 달', color: '#8B5CF6' },
   ];
 
@@ -173,11 +177,13 @@ function CollapsedSummary({
   subGoal: BoardDetail['sub_goals'][0] | undefined;
   completionPct: number;
 }) {
+  const C = useThemeColors();
+
   return (
     <View style={collapse.container}>
       <View style={collapse.left}>
-        <View style={collapse.dotBg}>
-          <SymbolView name="flame.fill" size={16} tintColor={Colors.primary} />
+        <View style={[collapse.dotBg, { backgroundColor: C.accentLight }]}>
+          <SymbolView name="flame.fill" size={16} tintColor={C.primary} />
         </View>
         <Text style={collapse.title} numberOfLines={1}>
           {subGoal?.title || '세부 목표'}
@@ -185,9 +191,9 @@ function CollapsedSummary({
       </View>
       <View style={collapse.right}>
         <View style={collapse.progressBg}>
-          <View style={[collapse.progressFill, { width: `${completionPct}%` as any }]} />
+          <View style={[collapse.progressFill, { width: `${completionPct}%` as any, backgroundColor: C.primaryEnd }]} />
         </View>
-        <Text style={collapse.pct}>{completionPct}%</Text>
+        <Text style={[collapse.pct, { color: C.primary }]}>{completionPct}%</Text>
         <SymbolView name="chevron.up" size={16} tintColor={Colors.textMuted} />
       </View>
     </View>
@@ -214,7 +220,6 @@ const collapse = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: Colors.accentLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -234,8 +239,8 @@ const collapse = StyleSheet.create({
     backgroundColor: Colors.border,
     overflow: 'hidden',
   },
-  progressFill: { height: '100%', borderRadius: 2, backgroundColor: Colors.primaryEnd },
-  pct: { fontSize: 13, fontWeight: '700', color: Colors.primary },
+  progressFill: { height: '100%', borderRadius: 2 },
+  pct: { fontSize: 13, fontWeight: '700' },
 });
 
 
@@ -252,15 +257,17 @@ function ProgressFooter({
   completedCells: number;
   totalCells: number;
 }) {
+  const C = useThemeColors();
+
   return (
     <View style={footer.container}>
       <View style={footer.left}>
-        <View style={footer.badge}>
-          <Text style={footer.badgeText}>{completedCells}/{totalCells} 완료</Text>
+        <View style={[footer.badge, { backgroundColor: C.accentLight, borderColor: C.primaryEnd }]}>
+          <Text style={[footer.badgeText, { color: C.primary }]}>{completedCells}/{totalCells} 완료</Text>
         </View>
         <Text style={footer.sub}>빙고 {bingoCount}개 달성</Text>
       </View>
-      <Text style={footer.pct}>{completionPct}%</Text>
+      <Text style={[footer.pct, { color: C.primary }]}>{completionPct}%</Text>
     </View>
   );
 }
@@ -274,21 +281,20 @@ const footer = StyleSheet.create({
   },
   left: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   badge: {
-    backgroundColor: Colors.accentLight,
     borderRadius: 20,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: Colors.primaryEnd,
   },
-  badgeText: { fontSize: 12, fontWeight: '600', color: Colors.primary },
+  badgeText: { fontSize: 12, fontWeight: '600' },
   sub: { fontSize: 12, color: Colors.textMuted },
-  pct: { fontSize: 20, fontWeight: '800', color: Colors.primary },
+  pct: { fontSize: 20, fontWeight: '800' },
 });
 
 // ─── Main Screen ──────────────────────────────────────────
 
 export default function HomeScreen() {
+  const C = useThemeColors();
   const { data: boards = [], isLoading } = useGertBoards();
   const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>();
   const [viewMode, setViewMode] = useState<'brief' | 'full'>('brief');
@@ -380,8 +386,8 @@ export default function HomeScreen() {
               return (
                 <LinearGradient
                   key={b.id}
-                  colors={[Colors.primary, Colors.primaryEnd]}
-                  style={styles.boardChipActive}
+                  colors={[C.primary, C.primaryEnd]}
+                  style={[styles.boardChipActive, { shadowColor: C.primary }]}
                 >
                   <Text style={styles.boardChipActiveText} numberOfLines={1}>{b.title}</Text>
                 </LinearGradient>
@@ -531,7 +537,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 10,
     paddingHorizontal: 14,
-    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.18,
     shadowRadius: 10,

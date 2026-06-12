@@ -1,23 +1,17 @@
-import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
 import { Colors, Spacing } from '@/constants/theme';
+import { useTheme, useThemeColors } from '@/contexts/ThemeContext';
+import { THEME_COLOR_OPTIONS } from '@/constants/themeColors';
 
 // ─── 상수 ─────────────────────────────────────────────────
 
-const THEME_OPTIONS = ['시스템', '라이트', '다크'] as const;
-
-const COLOR_OPTIONS = [
-  { hex: '#FF5F6D', name: '코랄' },
-  { hex: '#FF8953', name: '오렌지' },
-  { hex: '#F59E0B', name: '앰버' },
-  { hex: '#10B981', name: '에메랄드' },
-  { hex: '#3B82F6', name: '블루' },
-  { hex: '#8B5CF6', name: '퍼플' },
-  { hex: '#EC4899', name: '핑크' },
-  { hex: '#6B7280', name: '그레이' },
-];
+const THEME_OPTIONS = [
+  { label: '시스템', value: 'system' },
+  { label: '라이트', value: 'light' },
+  { label: '다크', value: 'dark' },
+] as const;
 
 // ─── 서브 컴포넌트 ─────────────────────────────────────────
 
@@ -31,7 +25,7 @@ function SectionCard({ children }: { children: React.ReactNode }) {
 
 function SettingRow({
   icon,
-  iconColor = Colors.primary,
+  iconColor,
   label,
   value,
   onPress,
@@ -46,6 +40,9 @@ function SettingRow({
   showChevron?: boolean;
   isLast?: boolean;
 }) {
+  const C = useThemeColors();
+  const color = iconColor ?? C.primary;
+
   return (
     <Pressable
       onPress={onPress}
@@ -56,8 +53,8 @@ function SettingRow({
       ]}
     >
       <View style={styles.rowLeft}>
-        <View style={[styles.iconWrap, { backgroundColor: `${iconColor}18` }]}>
-          <SymbolView name={icon as any} size={16} tintColor={iconColor} />
+        <View style={[styles.iconWrap, { backgroundColor: `${color}18` }]}>
+          <SymbolView name={icon as any} size={16} tintColor={color} />
         </View>
         <Text style={styles.rowLabel}>{label}</Text>
       </View>
@@ -74,14 +71,15 @@ function SettingRow({
 // ─── 메인 ─────────────────────────────────────────────────
 
 export default function SettingsScreen() {
-  const [selectedTheme, setSelectedTheme] = useState<typeof THEME_OPTIONS[number]>('시스템');
-  const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[0]);
+  const { colorSet, setColorSet, appTheme, setAppTheme } = useTheme();
+
+  const currentThemeLabel = THEME_OPTIONS.find((t) => t.value === appTheme)?.label ?? '시스템';
 
   const handleThemePress = () => {
     Alert.alert('앱 테마', '테마를 선택하세요', [
       ...THEME_OPTIONS.map((t) => ({
-        text: t,
-        onPress: () => setSelectedTheme(t),
+        text: t.label,
+        onPress: () => setAppTheme(t.value),
       })),
       { text: '취소', style: 'cancel' },
     ]);
@@ -103,27 +101,27 @@ export default function SettingsScreen() {
             <SettingRow
               icon="sun.max"
               label="앱 테마"
-              value={selectedTheme}
+              value={currentThemeLabel}
               onPress={handleThemePress}
             />
             <SettingRow
               icon="circle.fill"
-              iconColor={selectedColor.hex}
+              iconColor={colorSet.primary}
               label="테마 색상"
-              value={selectedColor.name}
+              value={colorSet.name}
               isLast
             />
           </SectionCard>
 
           {/* 색상 팔레트 */}
           <View style={styles.palette}>
-            {COLOR_OPTIONS.map((c) => (
+            {THEME_COLOR_OPTIONS.map((c) => (
               <Pressable
-                key={c.hex}
-                onPress={() => setSelectedColor(c)}
-                style={[styles.colorSwatch, { backgroundColor: c.hex }]}
+                key={c.primary}
+                onPress={() => setColorSet(c)}
+                style={[styles.colorSwatch, { backgroundColor: c.primary }]}
               >
-                {selectedColor.hex === c.hex && (
+                {colorSet.primary === c.primary && (
                   <SymbolView name="checkmark" size={14} tintColor="#fff" />
                 )}
               </Pressable>

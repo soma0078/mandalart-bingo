@@ -9,11 +9,11 @@ import { getBoardById } from '@/lib/boards';
 import { detectBingos } from '@/utils/gridMapper';
 import { CACHE_KEYS } from '@/constants/cacheKeys';
 import { Colors, Spacing } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 import type { BoardDetail } from '@/types/boards';
 
 // ─── 상수 ─────────────────────────────────────────────────
 
-const BOARD_COLORS = [Colors.primary, Colors.purple, Colors.warning, Colors.success, '#06B6D4', '#EC4899'];
 const WEEK_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
 
 // ─── 유틸 ─────────────────────────────────────────────────
@@ -72,12 +72,14 @@ function HeroCard({ pct, bingoCount, totalCompleted, totalCells }: {
   totalCompleted: number;
   totalCells: number;
 }) {
+  const C = useThemeColors();
+
   return (
     <LinearGradient
-      colors={[Colors.primary, Colors.primaryEnd, '#FFC347']}
+      colors={[C.primary, C.primaryEnd, '#FFC347']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={hero.card}
+      style={[hero.card, { shadowColor: C.primary }]}
     >
       <Text style={hero.label}>전체 달성률</Text>
       <View style={hero.row}>
@@ -98,7 +100,7 @@ function HeroCard({ pct, bingoCount, totalCompleted, totalCells }: {
 }
 
 const hero = StyleSheet.create({
-  card: { borderRadius: 24, padding: 24, gap: 16, shadowColor: Colors.primary, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 24, elevation: 6 },
+  card: { borderRadius: 24, padding: 24, gap: 16, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 24, elevation: 6 },
   label: { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
   row: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   left: { gap: 4 },
@@ -112,6 +114,7 @@ const hero = StyleSheet.create({
 });
 
 function BarChart({ data, labels }: { data: number[]; labels: string[] }) {
+  const C = useThemeColors();
   const maxVal = Math.max(...data, 1);
   const today = new Date().getDay();
   const todayIdx = (today + 6) % 7;
@@ -127,10 +130,10 @@ function BarChart({ data, labels }: { data: number[]; labels: string[] }) {
               <View style={[
                 chart.bar,
                 { height: barHeight },
-                isToday && chart.barToday,
+                isToday && { backgroundColor: C.primary },
               ]} />
             </View>
-            <Text style={[chart.label, isToday && chart.labelToday]}>{labels[i]}</Text>
+            <Text style={[chart.label, isToday && { color: C.primary, fontWeight: '700' }]}>{labels[i]}</Text>
           </View>
         );
       })}
@@ -143,9 +146,7 @@ const chart = StyleSheet.create({
   col: { flex: 1, alignItems: 'center', gap: 4 },
   barBg: { flex: 1, justifyContent: 'flex-end', width: '100%', alignItems: 'center' },
   bar: { width: '60%', borderRadius: 4, backgroundColor: Colors.border },
-  barToday: { backgroundColor: Colors.primary },
   label: { fontSize: 11, color: Colors.textMuted },
-  labelToday: { color: Colors.primary, fontWeight: '700' },
 });
 
 function BoardRow({ title, pct, color }: { title: string; pct: number; color: string }) {
@@ -174,8 +175,11 @@ const row = StyleSheet.create({
 // ─── 메인 ─────────────────────────────────────────────────
 
 export default function StatsScreen() {
+  const C = useThemeColors();
   const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
   const { data: boards = [] } = useGertBoards();
+
+  const BOARD_COLORS = [C.primary, Colors.purple, Colors.warning, Colors.success, '#06B6D4', '#EC4899'];
 
   const boardDetails = useQueries({
     queries: boards.map((b) => ({
@@ -228,7 +232,7 @@ export default function StatsScreen() {
       pct: getBoardPct(b),
       color: BOARD_COLORS[i % BOARD_COLORS.length],
     })),
-    [allBoards],
+    [allBoards, BOARD_COLORS],
   );
 
   const chartSubLabel = period === 'weekly' ? '이번 주 달성 현황' : '이번 달 주차별 달성 현황';

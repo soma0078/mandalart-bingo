@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Colors, FontSize, Radius } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 
 type Variant = 'primary' | 'success' | 'warning' | 'purple' | 'neutral';
 
@@ -9,8 +10,7 @@ interface Props {
   style?: ViewStyle;
 }
 
-const config: Record<Variant, { bg: string; text: string }> = {
-  primary: { bg: Colors.accentLight, text: Colors.primary },
+const staticConfig: Record<Exclude<Variant, 'primary'>, { bg: string; text: string }> = {
   success: { bg: '#F0FFF4', text: Colors.success },
   warning: { bg: '#FFFBEB', text: Colors.warning },
   purple: { bg: '#F5F3FF', text: Colors.purple },
@@ -18,7 +18,13 @@ const config: Record<Variant, { bg: string; text: string }> = {
 };
 
 export function Badge({ label, variant = 'neutral', style }: Props) {
-  const { bg, text } = config[variant];
+  const C = useThemeColors();
+
+  const { bg, text } =
+    variant === 'primary'
+      ? { bg: C.accentLight, text: C.primary }
+      : staticConfig[variant];
+
   return (
     <View style={[styles.badge, { backgroundColor: bg }, style]}>
       <Text style={[styles.label, { color: text }]}>{label}</Text>

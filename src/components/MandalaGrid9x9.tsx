@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { FullGridCell } from '@/utils/gridMapper';
 import { Colors } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 
 const CELL_SIZE = 30;
 
@@ -18,6 +19,8 @@ function getBlockBg(globalIndex: number): string {
 }
 
 export function MandalaGrid9x9({ fullGrid, onCellPress }: Props) {
+  const C = useThemeColors();
+
   return (
     <View style={styles.container}>
       <View style={styles.grid}>
@@ -35,19 +38,21 @@ export function MandalaGrid9x9({ fullGrid, onCellPress }: Props) {
                   backgroundColor: isCenter
                     ? Colors.textPrimary
                     : isCompleted
-                    ? Colors.accentLight
+                    ? C.accentLight
                     : getBlockBg(index),
-                  borderColor: isCompleted ? Colors.accentBorder : Colors.border,
+                  borderColor: isCompleted ? C.accentBorder : Colors.border,
                 },
                 onCellPress && pressed && styles.cellPressed,
               ]}
             >
-              {isCompleted && <Text style={styles.checkmark}>✓</Text>}
+              {isCompleted && (
+                <Text style={[styles.checkmark, { color: C.primary }]}>✓</Text>
+              )}
               <Text
                 style={[
                   styles.cellText,
                   isCenter && styles.centerText,
-                  isCompleted && styles.completedText,
+                  isCompleted && [styles.completedText, { color: C.primary }],
                 ]}
                 numberOfLines={2}
               >
@@ -92,7 +97,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
   },
   completedText: {
-    color: Colors.primary,
     fontWeight: '500',
   },
   checkmark: {
@@ -101,6 +105,5 @@ const styles = StyleSheet.create({
     right: 2,
     fontSize: 8,
     fontWeight: '700',
-    color: Colors.primary,
   },
 });

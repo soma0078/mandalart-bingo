@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Colors, FontSize, Radius } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 
 export type CellVariant = 'default' | 'core' | 'completed' | 'empty';
 
@@ -12,16 +13,17 @@ interface Props {
 }
 
 export function Cell({ label, variant = 'default', onPress, size = 100 }: Props) {
+  const C = useThemeColors();
   const textWidth = Math.floor(size * 0.8);
   const cellStyle = { width: size, height: size };
 
   const inner =
     variant === 'core' ? (
       <LinearGradient
-        colors={[Colors.primary, Colors.primaryEnd]}
+        colors={[C.primary, C.primaryEnd]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.base, styles.coreShadow, cellStyle]}
+        style={[styles.base, styles.coreShadow, { shadowColor: C.primary }, cellStyle]}
       >
         <Text style={[styles.coreLabel, { width: textWidth }]} numberOfLines={3}>
           {label ?? ''}
@@ -33,12 +35,14 @@ export function Cell({ label, variant = 'default', onPress, size = 100 }: Props)
           styles.base,
           styles.defaultShadow,
           cellStyle,
-          variant === 'completed' ? styles.completedBorder : styles.defaultBorder,
+          variant === 'completed'
+            ? { borderWidth: 1.5, borderColor: C.primary }
+            : styles.defaultBorder,
         ]}
       >
         {variant === 'completed' && (
-          <View style={styles.checkBadge}>
-            <Text style={styles.checkIcon}>✓</Text>
+          <View style={[styles.checkBadge, { backgroundColor: C.accentLight }]}>
+            <Text style={[styles.checkIcon, { color: C.primary }]}>✓</Text>
           </View>
         )}
         {variant === 'empty' ? (
@@ -86,7 +90,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   coreShadow: {
-    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.21,
     shadowRadius: 7,
@@ -95,10 +98,6 @@ const styles = StyleSheet.create({
   defaultBorder: {
     borderWidth: 1,
     borderColor: Colors.border,
-  },
-  completedBorder: {
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
   },
   defaultLabel: {
     fontSize: FontSize.caption,
@@ -122,7 +121,6 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: Colors.accentLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
@@ -130,7 +128,6 @@ const styles = StyleSheet.create({
   checkIcon: {
     fontSize: FontSize.caption,
     fontWeight: '700',
-    color: Colors.primary,
   },
   emptyPlus: {
     fontSize: FontSize.title,

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, TextInputProps } from 'react-native';
 import { Colors, FontSize, Radius } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 
 type Props = TextInputProps;
 
 export function Input({ style, onFocus, onBlur, value, multiline, ...rest }: Props) {
+  const C = useThemeColors();
   const [focused, setFocused] = useState(false);
   const isActive = focused || Boolean(value);
 
@@ -25,7 +27,9 @@ export function Input({ style, onFocus, onBlur, value, multiline, ...rest }: Pro
       }}
       style={[
         styles.input,
-        isActive ? styles.active : styles.default,
+        isActive
+          ? [styles.activeBase, { borderColor: C.primary }]
+          : styles.default,
         multiline && styles.multiline,
         style,
       ]}
@@ -47,10 +51,9 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
-  active: {
+  activeBase: {
     backgroundColor: Colors.white,
     borderWidth: 2,
-    borderColor: Colors.primary,
   },
   multiline: {
     height: undefined,

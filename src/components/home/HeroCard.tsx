@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, type DimensionValue } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
 import { Colors } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 import type { BoardDetail } from '@/types/boards';
 
 function getSubGoalPct(subGoal: BoardDetail['sub_goals'][0]): number {
@@ -15,16 +16,17 @@ interface Props {
 }
 
 export function HeroCard({ subGoal, boardTitle }: Props) {
+  const C = useThemeColors();
   if (!subGoal) return null;
   const pct = getSubGoalPct(subGoal);
   const sorted = [...subGoal.cells].sort((a, b) => a.position - b.position).slice(0, 4);
 
   return (
     <LinearGradient
-      colors={[Colors.primary, Colors.primaryEnd, '#FFC347']}
+      colors={[C.primary, C.primaryEnd, '#FFC347']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0.9 }}
-      style={styles.card}
+      style={[styles.card, { shadowColor: C.primary }]}
     >
       <View style={styles.chipRow}>
         <View style={styles.focusChip}>
@@ -55,7 +57,7 @@ export function HeroCard({ subGoal, boardTitle }: Props) {
             <View key={cell.id} style={styles.actionItem}>
               <View style={[styles.checkbox, cell.is_completed && styles.checkboxDone]}>
                 {cell.is_completed && (
-                  <Text style={{ fontSize: 9, color: Colors.primary, fontWeight: '700' }}>✓</Text>
+                  <Text style={{ fontSize: 9, color: C.primary, fontWeight: '700' }}>✓</Text>
                 )}
               </View>
               <Text
@@ -84,7 +86,6 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 24,
     padding: 24,
-    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.22,
     shadowRadius: 28,

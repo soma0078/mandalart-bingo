@@ -13,6 +13,7 @@ import { CACHE_KEYS } from '@/constants/cacheKeys';
 import { CreateBoardSheet } from '@/components/CreateBoardSheet';
 import { EmptyBoardsState } from '@/components/EmptyBoardsState';
 import { Colors, Spacing } from '@/constants/theme';
+import { useThemeColors } from '@/contexts/ThemeContext';
 import type { BoardDetail } from '@/types/boards';
 
 // ─── 유틸 ─────────────────────────────────────────────────
@@ -38,6 +39,7 @@ function BoardCard({ board, pct, bingoCount, onPress }: {
   bingoCount: number;
   onPress: () => void;
 }) {
+  const C = useThemeColors();
   const isDone = pct === 100;
 
   return (
@@ -54,8 +56,14 @@ function BoardCard({ board, pct, bingoCount, onPress }: {
           <Text style={card.date}>{formatDate(board.created_at)}</Text>
         </View>
         <View style={card.right}>
-          <View style={[card.badge, isDone ? card.badgeDone : card.badgeActive]}>
-            <Text style={[card.badgeText, isDone ? card.badgeTextDone : card.badgeTextActive]}>
+          <View style={[
+            card.badge,
+            isDone ? card.badgeDone : { backgroundColor: C.accentLight },
+          ]}>
+            <Text style={[
+              card.badgeText,
+              isDone ? card.badgeTextDone : { color: C.primary },
+            ]}>
               {isDone ? '완료' : '진행중'}
             </Text>
           </View>
@@ -74,7 +82,7 @@ function BoardCard({ board, pct, bingoCount, onPress }: {
           />
         ) : (
           <LinearGradient
-            colors={[Colors.primary, Colors.primaryEnd]}
+            colors={[C.primary, C.primaryEnd]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={[card.pbFill, { width: `${pct}%` as any }]}
@@ -84,7 +92,7 @@ function BoardCard({ board, pct, bingoCount, onPress }: {
 
       {/* 하단 통계 */}
       <View style={card.stats}>
-        <Text style={[card.statPct, isDone && card.statPctDone]}>{pct}% 달성</Text>
+        <Text style={[card.statPct, isDone ? card.statPctDone : { color: C.primary }]}>{pct}% 달성</Text>
         <Text style={card.statBingo}>빙고 {bingoCount}개</Text>
       </View>
     </Pressable>
@@ -100,15 +108,13 @@ const card = StyleSheet.create({
   date: { fontSize: 12, color: Colors.textMuted },
   right: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   badge: { borderRadius: 10, paddingVertical: 4, paddingHorizontal: 10 },
-  badgeActive: { backgroundColor: Colors.accentLight },
   badgeDone: { backgroundColor: '#F0FFF4' },
   badgeText: { fontSize: 12, fontWeight: '600' },
-  badgeTextActive: { color: Colors.primary },
   badgeTextDone: { color: '#10B981' },
   pbBg: { height: 6, borderRadius: 3, backgroundColor: '#F3F4F6', overflow: 'hidden' },
   pbFill: { height: '100%', borderRadius: 3 },
   stats: { flexDirection: 'row', gap: 16 },
-  statPct: { fontSize: 12, fontWeight: '600', color: Colors.primary },
+  statPct: { fontSize: 12, fontWeight: '600' },
   statPctDone: { color: '#10B981' },
   statBingo: { fontSize: 12, color: Colors.textMuted },
 });
@@ -118,6 +124,7 @@ const card = StyleSheet.create({
 const FILTERS: FilterType[] = ['전체', '진행중', '완료'];
 
 export default function ListScreen() {
+  const C = useThemeColors();
   const [filter, setFilter] = useState<FilterType>('전체');
   const [sheetOpen, setSheetOpen] = useState(false);
   const router = useRouter();
@@ -161,10 +168,10 @@ export default function ListScreen() {
           <Text style={styles.title}>내역</Text>
           <Pressable onPress={() => setSheetOpen(true)}>
             <LinearGradient
-              colors={[Colors.primary, Colors.primaryEnd]}
+              colors={[C.primary, C.primaryEnd]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              style={styles.newBtn}
+              style={[styles.newBtn, { shadowColor: C.primary }]}
             >
               <SymbolView name="plus" size={16} tintColor={Colors.white} />
               <Text style={styles.newBtnText}>새로 만들기</Text>
@@ -220,7 +227,7 @@ const styles = StyleSheet.create({
   loading: { textAlign: 'center', marginTop: 40, color: Colors.textMuted },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
-  newBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 20, paddingVertical: 10, paddingHorizontal: 16, shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
+  newBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 20, paddingVertical: 10, paddingHorizontal: 16, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
   newBtnText: { fontSize: 13, fontWeight: '600', color: Colors.white },
   filterRow: { flexDirection: 'row', gap: 8 },
   filterPill: { borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.border },
