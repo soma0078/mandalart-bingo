@@ -98,9 +98,13 @@ export function boardToFullGrid(
   if (!board) return fullGrid;
 
   // 중앙 셀(40 = 4*9 + 4)에 핵심 목표 배치
+  const allSubGoalsDone =
+    board.sub_goals.length > 0 &&
+    board.sub_goals.every((sg) => sg.cells.length > 0 && sg.cells.every((c) => c.is_completed));
+
   fullGrid[40] = {
     text: board.main_goal,
-    isCompleted: false,
+    isCompleted: allSubGoalsDone,
     isMainGoal: true,
   };
 
@@ -118,9 +122,12 @@ export function boardToFullGrid(
     const blockCenterCol = blockCol * 3 + 1;
     const blockCenterIndex = blockCenterRow * 9 + blockCenterCol;
 
+    const allCellsDone =
+      subGoal.cells.length > 0 && subGoal.cells.every((c) => c.is_completed);
+
     fullGrid[blockCenterIndex] = {
       text: subGoal.title || "",
-      isCompleted: false,
+      isCompleted: allCellsDone,
       subGoalPosition: subGoal.position,
     };
 

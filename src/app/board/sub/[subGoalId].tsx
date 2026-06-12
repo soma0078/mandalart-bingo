@@ -8,6 +8,7 @@ import {
   detectBingos,
   isCenterCell,
   subGoalToCells,
+  type BingoLine,
 } from "@/utils/gridMapper";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -42,20 +43,27 @@ export default function SubGoalViewer() {
   const subGoal = board?.sub_goals.find((sg) => sg.id === subGoalId);
   const cells = subGoal ? subGoalToCells(subGoal) : [];
 
-  const prevBingoCountRef = useRef(0);
+  const prevBingosRef = useRef<Set<string> | null>(null);
 
   useEffect(() => {
     if (!board) return;
 
     const currentBingos = detectBingos(board);
-    const currentCount = currentBingos.length;
+    const toKey = (b: BingoLine) => `${b.type}-${b.index}`;
+    const currentKeys = new Set(currentBingos.map(toKey));
 
-    if (currentCount > prevBingoCountRef.current) {
-      const newBingos = currentBingos.slice(prevBingoCountRef.current);
+    // 첫 로드 시 기준값만 설정 — 이미 존재하는 빙고는 알림 제외
+    if (prevBingosRef.current === null) {
+      prevBingosRef.current = currentKeys;
+      return;
+    }
+
+    const newBingos = currentBingos.filter((b) => !prevBingosRef.current!.has(toKey(b)));
+    if (newBingos.length > 0) {
       showBingoToast(newBingos);
     }
 
-    prevBingoCountRef.current = currentCount;
+    prevBingosRef.current = currentKeys;
   }, [board]);
 
   const showBingoToast = (bingos: ReturnType<typeof detectBingos>) => {
@@ -63,11 +71,14 @@ export default function SubGoalViewer() {
 
     const messages = bingos.map((b) => {
       if (b.type === "diagonal") {
-        return `대각선 ${b.index === 0 ? "↘" : "↙"} 빙고!`;
+        return `대각선(${b.index === 0 ? "↘" : "↙"}) 한 줄을 완성했어요!`;
       }
-      return `${b.type === "row" ? "행" : "열"} ${b.index + 1} 빙고!`;
+      if (b.type === "row") {
+        return `가로 ${b.index + 1}번째 줄을 완성했어요!`;
+      }
+      return `세로 ${b.index + 1}번째 줄을 완성했어요!`;
     });
-    const message = messages.join(" ");
+    const message = messages.join("\n");
 
     if (Platform.OS === "android") {
       ToastAndroid.show(`🎉 ${message}`, ToastAndroid.LONG);
