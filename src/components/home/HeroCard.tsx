@@ -22,14 +22,14 @@ export function HeroCard({ subGoal, boardTitle }: Props) {
 
   return (
     <LinearGradient
-      colors={[C.primary, C.primaryEnd, '#FFC347']}
+      colors={[C.primary, C.primaryEnd]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0.9 }}
       style={[styles.card, { shadowColor: C.primary }]}
     >
       <View style={styles.chipRow}>
         <View style={styles.focusChip}>
-          <Text style={[styles.focusChipText, { color: C.white }]}>{boardTitle}</Text>
+          <Text style={[styles.focusChipText, { color: '#FFFFFF' }]}>{boardTitle}</Text>
         </View>
         <View style={styles.autoTag}>
           <Text style={styles.autoTagText}>집중 중</Text>
@@ -41,10 +41,10 @@ export function HeroCard({ subGoal, boardTitle }: Props) {
       <View style={styles.titleRow}>
         <View style={{ gap: 3 }}>
           <Text style={styles.titleSub}>세부 목표</Text>
-          <Text style={[styles.title, { color: C.white }]}>{subGoal.title}</Text>
+          <Text style={[styles.title, { color: '#FFFFFF' }]}>{subGoal.title}</Text>
         </View>
         <View style={styles.ring}>
-          <Text style={[styles.ringPct, { color: C.white }]}>{pct}%</Text>
+          <Text style={[styles.ringPct, { color: '#FFFFFF' }]}>{pct}%</Text>
         </View>
       </View>
 
@@ -54,7 +54,7 @@ export function HeroCard({ subGoal, boardTitle }: Props) {
         {sorted.length > 0 ? (
           sorted.map((cell) => (
             <View key={cell.id} style={styles.actionItem}>
-              <View style={[styles.checkbox, cell.is_completed && { backgroundColor: C.white, borderColor: C.white }]}>
+              <View style={[styles.checkbox, cell.is_completed && { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF' }]}>
                 {cell.is_completed && (
                   <Text style={{ fontSize: 9, color: C.primary, fontWeight: '700' }}>✓</Text>
                 )}
@@ -75,7 +75,7 @@ export function HeroCard({ subGoal, boardTitle }: Props) {
       <View style={{ height: 14 }} />
 
       <View style={styles.progressBg}>
-        <View style={[styles.progressFill, { width: `${pct}%` as DimensionValue, backgroundColor: C.white }]} />
+        <View style={[styles.progressFill, { width: `${pct}%` as DimensionValue, backgroundColor: '#FFFFFF' }]} />
       </View>
     </LinearGradient>
   );

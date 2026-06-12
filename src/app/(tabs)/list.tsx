@@ -188,7 +188,7 @@ export default function ListScreen() {
               style={[
                 styles.filterPill,
                 { backgroundColor: C.white, borderColor: C.border },
-                filter === f && { backgroundColor: C.textPrimary, borderColor: C.textPrimary },
+                filter === f && { backgroundColor: C.primary, borderColor: C.primary },
               ]}
             >
               <Text style={[

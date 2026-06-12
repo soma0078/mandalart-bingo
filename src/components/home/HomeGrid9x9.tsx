@@ -2,7 +2,6 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import type { FullGridCell } from '@/utils/gridMapper';
 
-const BLOCK_BG = '#FFFFFF';
 
 interface Props {
   fullGrid: FullGridCell[];
@@ -19,7 +18,7 @@ export function HomeGrid9x9({ fullGrid, onCellPress }: Props) {
           {[0, 1, 2].map((bc) => {
             const bi = br * 3 + bc;
             return (
-              <View key={bc} style={[styles.block, { backgroundColor: BLOCK_BG }]}>
+              <View key={bc} style={[styles.block, { backgroundColor: C.white }]}>
                 {[0, 1, 2].map((cr) => (
                   <View key={cr} style={styles.blockRow}>
                     {[0, 1, 2].map((cc) => {

@@ -76,7 +76,7 @@ function HeroCard({ pct, bingoCount, totalCompleted, totalCells }: {
 
   return (
     <LinearGradient
-      colors={[C.primary, C.primaryEnd, '#FFC347']}
+      colors={[C.primary, C.primaryEnd]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[hero.card, { shadowColor: C.primary }]}
@@ -254,18 +254,18 @@ export default function StatsScreen() {
         <View style={[styles.card, { backgroundColor: C.white }]}>
           <View style={styles.cardHeader}>
             <Text style={[styles.cardTitle, { color: C.textPrimary }]}>기간별 달성</Text>
-            <View style={styles.toggle}>
+            <View style={[styles.toggle, { backgroundColor: C.border }]}>
               <Pressable
                 onPress={() => setPeriod('weekly')}
-                style={[styles.togglePill, period === 'weekly' && [styles.togglePillActive, { backgroundColor: C.white }]]}
+                style={[styles.togglePill, period === 'weekly' && { backgroundColor: C.primary }]}
               >
-                <Text style={[styles.toggleText, { color: C.textMuted }, period === 'weekly' && [styles.toggleTextActive, { color: C.textPrimary }]]}>주간</Text>
+                <Text style={[styles.toggleText, { color: period === 'weekly' ? '#FFFFFF' : C.textMuted }, period === 'weekly' && styles.toggleTextActive]}>주간</Text>
               </Pressable>
               <Pressable
                 onPress={() => setPeriod('monthly')}
-                style={[styles.togglePill, period === 'monthly' && [styles.togglePillActive, { backgroundColor: C.white }]]}
+                style={[styles.togglePill, period === 'monthly' && { backgroundColor: C.primary }]}
               >
-                <Text style={[styles.toggleText, { color: C.textMuted }, period === 'monthly' && [styles.toggleTextActive, { color: C.textPrimary }]]}>월간</Text>
+                <Text style={[styles.toggleText, { color: period === 'monthly' ? '#FFFFFF' : C.textMuted }, period === 'monthly' && styles.toggleTextActive]}>월간</Text>
               </Pressable>
             </View>
           </View>

@@ -17,6 +17,7 @@ import {
   Alert,
   Platform,
   Pressable,
+  StatusBar,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -143,11 +144,18 @@ export default function SubGoalViewer() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: C.bg }]} edges={["bottom"]}>
+      <StatusBar
+        backgroundColor={C.bg}
+        barStyle={C.textPrimary === '#F1F2F6' ? 'light-content' : 'dark-content'}
+      />
       <Stack.Screen
         options={{
           headerShown: true,
           title: subGoal?.title || "세부 목표",
           headerBackTitle: "",
+          headerStyle: { backgroundColor: C.bg },
+          headerTintColor: C.textPrimary,
+          contentStyle: { backgroundColor: C.bg },
         }}
       />
 
@@ -161,7 +169,7 @@ export default function SubGoalViewer() {
                 style={({ pressed }) => [
                   styles.cell,
                   { borderColor: C.border },
-                  isCenter && [styles.centerCell, { backgroundColor: C.textPrimary }],
+                  isCenter && [styles.centerCell, { backgroundColor: C.primary }],
                   cellData.isCompleted && !isCenter && [styles.completedCell, { backgroundColor: C.accentLight, borderColor: C.accentBorder }],
                   pressed && styles.cellPressed,
                 ]}
