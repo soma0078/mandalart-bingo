@@ -23,6 +23,7 @@ import {
 import { useCellNavigation } from '@/utils/cellNavigation';
 import { BoardEditSheet } from '@/components/BoardEditSheet';
 import { CreateBoardSheet } from '@/components/CreateBoardSheet';
+import { ShareModal } from '@/components/ShareModal';
 import { EmptyBoardsState } from '@/components/EmptyBoardsState';
 import { Spacing } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
@@ -293,6 +294,7 @@ export default function HomeScreen() {
   const [viewMode, setViewMode] = useState<'brief' | 'full'>('brief');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [boardEditOpen, setBoardEditOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     if (selectedBoardId && boards.length > 0 && !boards.find((b) => b.id === selectedBoardId)) {
@@ -370,9 +372,12 @@ export default function HomeScreen() {
             >
               <SymbolView name="plus" size={20} tintColor={C.textPrimary} />
             </Pressable>
-            <View style={[styles.headerBtn, { backgroundColor: C.white }]}>
-              <SymbolView name="bell" size={20} tintColor={C.textPrimary} />
-            </View>
+            <Pressable
+              onPress={() => setShareOpen(true)}
+              style={[styles.headerBtn, { backgroundColor: C.white }]}
+            >
+              <SymbolView name="square.and.arrow.up" size={20} tintColor={C.textPrimary} />
+            </Pressable>
           </View>
         </View>
 
@@ -475,6 +480,14 @@ export default function HomeScreen() {
         selectedBoardId={effectiveBoardId}
         onSelect={(id) => setSelectedBoardId(id)}
         onClose={() => setBoardEditOpen(false)}
+      />
+      <ShareModal
+        visible={shareOpen}
+        board={board}
+        fullGrid={fullGrid}
+        completionPct={statsData.pct}
+        bingoCount={bingoCount}
+        onClose={() => setShareOpen(false)}
       />
     </View>
   );
