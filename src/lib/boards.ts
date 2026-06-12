@@ -4,6 +4,7 @@ import {
   CreateBoardPayload,
   UpdateBoardPayload,
 } from "@/types/boards";
+import type { TemplateSubGoal } from "@/constants/templates";
 import { supabase } from "./supabase";
 
 export async function getBoards(): Promise<Board[]> {
@@ -37,7 +38,10 @@ export async function getBoardById(id: string): Promise<BoardDetail> {
 
 // 보드 생성 시 서브 목표 8개 + 셀 64개를 순차적으로 초기화
 // 중간 단계 실패 시 이전 데이터가 남으므로 주의
-export async function createBoard(payload: CreateBoardPayload): Promise<Board> {
+export async function createBoard(
+  payload: CreateBoardPayload,
+  templateSubGoals?: TemplateSubGoal[],
+): Promise<Board> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("No authenticated user");
 
@@ -52,7 +56,7 @@ export async function createBoard(payload: CreateBoardPayload): Promise<Board> {
   const subGoals = Array.from({ length: 8 }, (_, i) => ({
     board_id: board.id,
     position: i,
-    title: "",
+    title: templateSubGoals?.[i]?.title ?? "",
   }));
 
   const { data: insertedSubGoals, error: subGoalError } = await supabase
@@ -62,12 +66,11 @@ export async function createBoard(payload: CreateBoardPayload): Promise<Board> {
 
   if (subGoalError) throw subGoalError;
 
-  // flatMap으로 서브 목표 8개 × 셀 8개 = 64개 배열 생성 후 한 번에 insert
-  const cells = insertedSubGoals.flatMap((subGoal) =>
+  const cells = insertedSubGoals.flatMap((subGoal, sgIdx) =>
     Array.from({ length: 8 }, (_, i) => ({
       sub_goal_id: subGoal.id,
       position: i,
-      text: "",
+      text: templateSubGoals?.[sgIdx]?.actions?.[i] ?? "",
       is_completed: false,
     })),
   );
