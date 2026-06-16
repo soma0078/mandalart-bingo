@@ -57,17 +57,21 @@ Board (만다라트)
 
 ## 구현 현황
 
-### 완료
-- Supabase 익명 인증 연동
-- Board / SubGoal / Cell CRUD 레이어
-- TanStack Query 훅 (`useGetBoards`, `useGetBoardById`, `useCreateBoard`)
-- 홈 화면: Empty State / 보드 생성 모달 / 3×3 그리드 표시
+### Phase 1 — 완료
+- Supabase 익명 인증 + Board / SubGoal / Cell CRUD
+- 홈: 보드 생성 모달, 3×3 그리드, 뷰 모드 스위치 (3×3 ↔ 9×9)
+- 드릴다운 뷰, 바텀시트 편집
+- 셀 완료 체크 + 진행률 표시 + 빙고 감지 (가로/세로/대각선)
+- 통계 탭, 내역 탭, 설정 탭
 
-### Phase 1 미완성
-- 드릴다운 뷰 (세부 목표 3×3 상세)
-- 셀 완료 체크 및 진행률 표시
-- 빙고 달성 감지
-- 9×9 전체 그리드 뷰
-- 통계 / 내역 / 설정 탭
+### Phase 2 — 완료
+- 다크 모드 + 동적 테마 시스템
+- 홈 Momentum 뷰 (진행률 기반 집중 목표 자동 추천)
+- 빙고 달성 축하 애니메이션
+- 템플릿 시스템
+- 공유 기능 (이미지/PDF)
 
-자세한 기획은 [`docs/PRD-mandalart-bingo.md`](docs/PRD-mandalart-bingo.md), [`docs/IA-screen-flow.md`](docs/IA-screen-flow.md) 참고.
+---
+
+기획 문서: [`docs/PRD-mandalart-bingo.md`](docs/PRD-mandalart-bingo.md), [`docs/IA-screen-flow.md`](docs/IA-screen-flow.md)  
+배포 전략: [`docs/deployment.md`](docs/deployment.md)
