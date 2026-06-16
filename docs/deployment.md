@@ -7,14 +7,13 @@
 ### 워크플로우 구조
 
 ```
-main 브랜치 push
-  └── deploy-pwa.yml → Vercel PWA 자동 배포 (~2분)
-
-v*.*.* 태그 push
-  └── deploy-android.yml → EAS Android 빌드 (~15분)
+feat  → dev 머지  : 트리거 없음
+dev   브랜치 push : deploy-pwa.yml → Vercel Preview 배포 (~2분)
+main  브랜치 push : deploy-pwa.yml → Vercel Production 배포 (~2분)
+v*.*.* 태그 push  : deploy-android.yml → EAS Android 빌드 (~15분)
 ```
 
-EAS 빌드는 크레딧 소모가 크므로 태그 기반으로만 트리거.
+EAS 빌드는 크레딧 소모가 크므로 main 기준 태그에서만 트리거.
 
 ### 워크플로우 파일
 
