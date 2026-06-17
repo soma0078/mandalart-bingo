@@ -69,12 +69,11 @@ export default function WebHomeScreen() {
     }
   };
 
-  // ─── Desktop 01: 홈 ──────────────────────────────────────────
-  if (viewTab === 'home') {
+  // ─── 간략히: 대시보드 뷰 ─────────────────────────────────────
+  if (viewTab === 'brief') {
     return (
       <View style={[styles.container, { backgroundColor: C.bg }]}>
         <View style={styles.layout}>
-          {/* Main */}
           <View style={styles.main}>
             <StatsCardRow
               streak={7}
@@ -88,7 +87,6 @@ export default function WebHomeScreen() {
               boardTitle={board?.title ?? ''}
             />
           </View>
-          {/* Right panel */}
           <View style={styles.rightPanel}>
             <SubGoalGridPanel board={board} />
           </View>
@@ -97,38 +95,25 @@ export default function WebHomeScreen() {
     );
   }
 
-  // ─── Desktop 02: 간략히 ──────────────────────────────────────
-  if (viewTab === 'brief') {
-    return (
-      <View style={[styles.container, { backgroundColor: C.bg }]}>
-        <View style={styles.layout}>
-          {/* Main: 9×9 grid */}
-          <View style={styles.main}>
-            {board && (
-              <View style={styles.briefHeader}>
-                <Text style={[styles.briefTitle, { color: C.textPrimary }]}>{board.title}</Text>
-                <View style={styles.briefBadges}>
-                  <Text style={[styles.briefPct, { color: C.textSecondary }]}>{statsData.pct}% 달성</Text>
-                  <Text style={[styles.briefBingo, { color: C.primary }]}>빙고 {bingoCount}개</Text>
-                </View>
-              </View>
-            )}
-            <HomeGrid9x9 fullGrid={fullGrid} onCellPress={handleGridCellPress} />
-          </View>
-          {/* Right panel */}
-          <View style={styles.rightPanel}>
-            <SubGoalDetailPanel board={board} selectedPos={selectedSubGoalPos} />
-          </View>
-        </View>
-      </View>
-    );
-  }
-
-  // ─── Desktop 전체 ─────────────────────────────────────────────
+  // ─── 전체: 9×9 그리드 + 세부목표 패널 ───────────────────────
   return (
     <View style={[styles.container, { backgroundColor: C.bg }]}>
-      <View style={styles.fullLayout}>
-        <HomeGrid9x9 fullGrid={fullGrid} onCellPress={handleGridCellPress} />
+      <View style={styles.layout}>
+        <View style={styles.main}>
+          {board && (
+            <View style={styles.briefHeader}>
+              <Text style={[styles.briefTitle, { color: C.textPrimary }]}>{board.title}</Text>
+              <View style={styles.briefBadges}>
+                <Text style={[styles.briefPct, { color: C.textSecondary }]}>{statsData.pct}% 달성</Text>
+                <Text style={[styles.briefBingo, { color: C.primary }]}>빙고 {bingoCount}개</Text>
+              </View>
+            </View>
+          )}
+          <HomeGrid9x9 fullGrid={fullGrid} onCellPress={handleGridCellPress} />
+        </View>
+        <View style={styles.rightPanel}>
+          <SubGoalDetailPanel board={board} selectedPos={selectedSubGoalPos} />
+        </View>
       </View>
     </View>
   );

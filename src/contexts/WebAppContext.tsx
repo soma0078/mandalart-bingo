@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 
-export type WebViewTab = 'home' | 'brief' | 'full';
+export type WebViewTab = 'brief' | 'full';
 
 interface WebAppContextValue {
   activeBoardId: string | undefined;
@@ -14,7 +14,7 @@ interface WebAppContextValue {
 const WebAppContext = createContext<WebAppContextValue>({
   activeBoardId: undefined,
   setActiveBoardId: () => {},
-  viewTab: 'home',
+  viewTab: 'brief',
   setViewTab: () => {},
   selectedSubGoalPos: null,
   setSelectedSubGoalPos: () => {},
@@ -22,7 +22,7 @@ const WebAppContext = createContext<WebAppContextValue>({
 
 export function WebAppProvider({ children }: { children: React.ReactNode }) {
   const [activeBoardId, setActiveBoardId] = useState<string | undefined>(undefined);
-  const [viewTab, setViewTab] = useState<WebViewTab>('home');
+  const [viewTab, setViewTab] = useState<WebViewTab>('brief');
   const [selectedSubGoalPos, setSelectedSubGoalPos] = useState<number | null>(null);
 
   return (

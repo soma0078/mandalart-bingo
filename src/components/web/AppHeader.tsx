@@ -3,13 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { usePathname } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useThemeColors } from '@/contexts/ThemeContext';
-import { useWebApp, type WebViewTab } from '@/contexts/WebAppContext';
-
-const TABS: { key: WebViewTab; label: string }[] = [
-  { key: 'home', label: '홈' },
-  { key: 'brief', label: '간략히' },
-  { key: 'full', label: '전체' },
-];
+import { useWebApp } from '@/contexts/WebAppContext';
 
 export function AppHeader() {
   const C = useThemeColors();
@@ -20,31 +14,35 @@ export function AppHeader() {
 
   return (
     <View style={[styles.header, { backgroundColor: C.white, borderBottomColor: C.border }]}>
-      {/* Left: tabs (home only) */}
+      {/* Left: "홈" 고정 텍스트 + 간략히/전체 토글 */}
       <View style={styles.left}>
         {isHome && (
-          <View style={[styles.tabContainer, { backgroundColor: C.bg }]}>
-            {TABS.map((tab) => {
-              const isActive = viewTab === tab.key;
-              if (isActive) {
+          <View style={styles.titleRow}>
+            <Text style={[styles.pageTitle, { color: C.textPrimary }]}>홈</Text>
+            <View style={[styles.toggle, { backgroundColor: C.bg }]}>
+              {(['brief', 'full'] as const).map((tab) => {
+                const isActive = viewTab === tab;
+                const label = tab === 'brief' ? '간략히' : '전체';
+                if (isActive) {
+                  return (
+                    <LinearGradient
+                      key={tab}
+                      colors={[C.primary, C.primaryEnd]}
+                      style={styles.togglePill}
+                    >
+                      <Text style={[styles.toggleText, { color: C.white }, styles.toggleTextActive]}>
+                        {label}
+                      </Text>
+                    </LinearGradient>
+                  );
+                }
                 return (
-                  <LinearGradient
-                    key={tab.key}
-                    colors={[C.primary, C.primaryEnd]}
-                    style={styles.tabPill}
-                  >
-                    <Text style={[styles.tabText, { color: C.white }, styles.tabTextActive]}>
-                      {tab.label}
-                    </Text>
-                  </LinearGradient>
+                  <Pressable key={tab} onPress={() => setViewTab(tab)} style={styles.togglePill}>
+                    <Text style={[styles.toggleText, { color: C.textSecondary }]}>{label}</Text>
+                  </Pressable>
                 );
-              }
-              return (
-                <Pressable key={tab.key} onPress={() => setViewTab(tab.key)} style={styles.tabPill}>
-                  <Text style={[styles.tabText, { color: C.textSecondary }]}>{tab.label}</Text>
-                </Pressable>
-              );
-            })}
+              })}
+            </View>
           </View>
         )}
       </View>
@@ -62,7 +60,7 @@ export function AppHeader() {
         </View>
         <Ionicons name="notifications-outline" size={20} color={C.textSecondary} />
         <View style={[styles.avatar, { backgroundColor: C.primary }]}>
-          <Text style={styles.avatarText}>S</Text>
+          <Text style={[styles.avatarText, { color: C.white }]}>S</Text>
         </View>
       </View>
     </View>
@@ -81,24 +79,32 @@ const styles = StyleSheet.create({
   left: {
     flex: 1,
   },
-  tabContainer: {
+  titleRow: {
     flexDirection: 'row',
-    alignSelf: 'flex-start',
+    alignItems: 'center',
+    gap: 12,
+  },
+  pageTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  toggle: {
+    flexDirection: 'row',
     borderRadius: 20,
     padding: 3,
     gap: 2,
   },
-  tabPill: {
+  togglePill: {
     paddingVertical: 5,
     paddingHorizontal: 14,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tabText: {
+  toggleText: {
     fontSize: 13,
   },
-  tabTextActive: {
+  toggleTextActive: {
     fontWeight: '700',
   },
   right: {
@@ -129,7 +135,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: {
-    color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
   },

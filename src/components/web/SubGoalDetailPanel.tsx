@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import { useUpdateCell } from '@/hooks/useUpdateCell';
@@ -8,13 +9,27 @@ interface Props {
   selectedPos: number | null;
 }
 
+function getDefaultSubGoal(board: BoardDetail | undefined) {
+  if (!board?.sub_goals.length) return undefined;
+  const withPct = board.sub_goals.map((sg) => ({
+    sg,
+    pct: sg.cells.length > 0 ? sg.cells.filter((c) => c.is_completed).length / sg.cells.length : 0,
+  }));
+  const inProgress = withPct.filter(({ pct }) => pct > 0 && pct < 1).sort((a, b) => b.pct - a.pct);
+  return (inProgress[0] ?? withPct[0])?.sg;
+}
+
 export function SubGoalDetailPanel({ board, selectedPos }: Props) {
   const C = useThemeColors();
 
-  const subGoal = board?.sub_goals.find((sg) => sg.position === selectedPos);
+  const defaultSubGoal = useMemo(() => getDefaultSubGoal(board), [board]);
+  const subGoal = selectedPos !== null
+    ? board?.sub_goals.find((sg) => sg.position === selectedPos)
+    : defaultSubGoal;
+
   const { mutate: updateCell } = useUpdateCell(board?.id ?? '');
 
-  if (!board || selectedPos === null || !subGoal) {
+  if (!board || !subGoal) {
     return (
       <View style={[styles.panel, styles.empty, { backgroundColor: C.white }]}>
         <Text style={[styles.emptyText, { color: C.textMuted }]}>세부 목표를 선택하세요</Text>
