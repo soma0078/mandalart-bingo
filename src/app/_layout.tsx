@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,14 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      import('@vercel/speed-insights').then(({ injectSpeedInsights }) => {
+        injectSpeedInsights();
+      });
+    }
+  }, []);
+
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
