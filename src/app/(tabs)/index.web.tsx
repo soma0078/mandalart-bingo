@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import { useWebApp } from '@/contexts/WebAppContext';
 import { useGertBoards } from '@/hooks/useGetBoards';
@@ -33,6 +34,36 @@ function getFocusedSubGoal(board: BoardDetail | undefined) {
   const sorted = inProgress.sort((a, b) => b.pct - a.pct);
   return sorted[0]?.sg ?? withPct[0].sg;
 }
+
+function ViewToggle() {
+  const C = useThemeColors();
+  const { viewTab, setViewTab } = useWebApp();
+  return (
+    <View style={[toggleStyles.wrap, { backgroundColor: C.bg }]}>
+      {(['brief', 'full'] as const).map((tab) => {
+        const label = tab === 'brief' ? '간략히' : '전체';
+        if (viewTab === tab) {
+          return (
+            <LinearGradient key={tab} colors={[C.primary, C.primaryEnd]} style={toggleStyles.pill}>
+              <Text style={[toggleStyles.text, { color: C.white, fontWeight: '700' }]}>{label}</Text>
+            </LinearGradient>
+          );
+        }
+        return (
+          <Pressable key={tab} onPress={() => setViewTab(tab)} style={toggleStyles.pill}>
+            <Text style={[toggleStyles.text, { color: C.textSecondary }]}>{label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+const toggleStyles = StyleSheet.create({
+  wrap: { flexDirection: 'row', borderRadius: 20, padding: 3, gap: 2 },
+  pill: { paddingVertical: 5, paddingHorizontal: 14, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  text: { fontSize: 13 },
+});
 
 export default function WebHomeScreen() {
   const C = useThemeColors();
@@ -69,51 +100,52 @@ export default function WebHomeScreen() {
     }
   };
 
-  // ─── 간략히: 대시보드 뷰 ─────────────────────────────────────
-  if (viewTab === 'brief') {
-    return (
-      <View style={[styles.container, { backgroundColor: C.bg }]}>
-        <View style={styles.layout}>
-          <View style={styles.main}>
-            <StatsCardRow
-              streak={7}
-              completionPct={statsData.pct}
-              bingoCount={bingoCount}
-              subGoalCount={subGoalCount}
-            />
-            <HeroFocusCard
-              subGoal={focusedSubGoal}
-              pct={focusedPct}
-              boardTitle={board?.title ?? ''}
-            />
-          </View>
-          <View style={styles.rightPanel}>
-            <SubGoalGridPanel board={board} />
-          </View>
-        </View>
-      </View>
-    );
-  }
-
-  // ─── 전체: 9×9 그리드 + 세부목표 패널 ───────────────────────
   return (
     <View style={[styles.container, { backgroundColor: C.bg }]}>
+      {/* 페이지 툴바: 뷰 토글 */}
+      <View style={styles.toolbar}>
+        <ViewToggle />
+      </View>
+
       <View style={styles.layout}>
-        <View style={styles.main}>
-          {board && (
-            <View style={styles.briefHeader}>
-              <Text style={[styles.briefTitle, { color: C.textPrimary }]}>{board.title}</Text>
-              <View style={styles.briefBadges}>
-                <Text style={[styles.briefPct, { color: C.textSecondary }]}>{statsData.pct}% 달성</Text>
-                <Text style={[styles.briefBingo, { color: C.primary }]}>빙고 {bingoCount}개</Text>
-              </View>
+        {viewTab === 'brief' ? (
+          <>
+            <View style={styles.main}>
+              <StatsCardRow
+                streak={7}
+                completionPct={statsData.pct}
+                bingoCount={bingoCount}
+                subGoalCount={subGoalCount}
+              />
+              <HeroFocusCard
+                subGoal={focusedSubGoal}
+                pct={focusedPct}
+                boardTitle={board?.title ?? ''}
+              />
             </View>
-          )}
-          <HomeGrid9x9 fullGrid={fullGrid} onCellPress={handleGridCellPress} />
-        </View>
-        <View style={styles.rightPanel}>
-          <SubGoalDetailPanel board={board} selectedPos={selectedSubGoalPos} />
-        </View>
+            <View style={styles.rightPanel}>
+              <SubGoalGridPanel board={board} />
+            </View>
+          </>
+        ) : (
+          <>
+            <View style={styles.main}>
+              {board && (
+                <View style={styles.briefHeader}>
+                  <Text style={[styles.briefTitle, { color: C.textPrimary }]}>{board.title}</Text>
+                  <View style={styles.briefBadges}>
+                    <Text style={[styles.briefPct, { color: C.textSecondary }]}>{statsData.pct}% 달성</Text>
+                    <Text style={[styles.briefBingo, { color: C.primary }]}>빙고 {bingoCount}개</Text>
+                  </View>
+                </View>
+              )}
+              <HomeGrid9x9 fullGrid={fullGrid} onCellPress={handleGridCellPress} />
+            </View>
+            <View style={styles.rightPanel}>
+              <SubGoalDetailPanel board={board} selectedPos={selectedSubGoalPos} />
+            </View>
+          </>
+        )}
       </View>
     </View>
   );
@@ -123,6 +155,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
+    gap: 16,
+  },
+  toolbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   layout: {
     flex: 1,
