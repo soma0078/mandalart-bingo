@@ -266,6 +266,49 @@ describe('gridMapper', () => {
       expect(grid[0].cellPosition).toBe(0);
     });
 
+    describe('main goal completion (grid[40].isCompleted)', () => {
+      it('should be false when there are no sub-goals', () => {
+        const board = createMockBoard({ sub_goals: [] });
+        expect(boardToFullGrid(board)[40].isCompleted).toBe(false);
+      });
+
+      it('should be false when a sub-goal has no cells', () => {
+        const board = createMockBoard({
+          sub_goals: [createMockSubGoal({ position: 0, cells: [] })],
+        });
+        expect(boardToFullGrid(board)[40].isCompleted).toBe(false);
+      });
+
+      it('should be false when any cell is incomplete', () => {
+        const board = createMockBoard({
+          sub_goals: [
+            createMockSubGoal({
+              position: 0,
+              cells: [
+                createMockCell({ position: 0, is_completed: true }),
+                createMockCell({ position: 1, is_completed: false }),
+              ],
+            }),
+          ],
+        });
+        expect(boardToFullGrid(board)[40].isCompleted).toBe(false);
+      });
+
+      it('should be true when all sub-goals have all cells completed', () => {
+        const board = createMockBoard({
+          sub_goals: Array.from({ length: 8 }, (_, i) =>
+            createMockSubGoal({
+              position: i,
+              cells: Array.from({ length: 8 }, (_, j) =>
+                createMockCell({ position: j, is_completed: true })
+              ),
+            })
+          ),
+        });
+        expect(boardToFullGrid(board)[40].isCompleted).toBe(true);
+      });
+    });
+
     it('should correctly map 81 cells with all 8 sub-goals', () => {
       const board = createMockBoard({
         sub_goals: Array.from({ length: 8 }, (_, i) =>
@@ -357,31 +400,80 @@ describe('gridMapper', () => {
       expect(bingos).toContainEqual({ type: 'row', index: 0 });
     });
 
-    it('should detect completed column bingo', () => {
-      // Skip testing column/diagonal detection in detail since row detection works
-      // and the implementation is straightforward. Just verify the function handles it.
+    it('should detect column bingo (col 0)', () => {
+      // Col 0 passes through: subGoal pos 0 (cells 0,3,5), pos 3 (cells 0,3,5), pos 5 (cells 0,3,5)
+      // Mapping: col0 absolute rows 0,1,2 → block pos 0 cellPos 0,3,5
+      //          col0 absolute rows 3,4,5 → block pos 3 cellPos 0,3,5
+      //          col0 absolute rows 6,7,8 → block pos 5 cellPos 0,3,5
       const board = createMockBoard({
-        sub_goals: Array.from({ length: 8 }, (_, i) =>
+        sub_goals: [
           createMockSubGoal({
-            position: i,
-            cells: Array.from({ length: 8 }, (_, j) =>
-              // Complete only cells at specific positions for first column
-              createMockCell({
-                position: j,
-                is_completed: j === 0 || j === 3 || j === 6,
-              })
-            ),
-          })
-        ),
+            position: 0,
+            cells: [
+              createMockCell({ position: 0, is_completed: true }),
+              createMockCell({ position: 3, is_completed: true }),
+              createMockCell({ position: 5, is_completed: true }),
+            ],
+          }),
+          createMockSubGoal({
+            position: 3,
+            cells: [
+              createMockCell({ position: 0, is_completed: true }),
+              createMockCell({ position: 3, is_completed: true }),
+              createMockCell({ position: 5, is_completed: true }),
+            ],
+          }),
+          createMockSubGoal({
+            position: 5,
+            cells: [
+              createMockCell({ position: 0, is_completed: true }),
+              createMockCell({ position: 3, is_completed: true }),
+              createMockCell({ position: 5, is_completed: true }),
+            ],
+          }),
+        ],
       });
       const bingos = detectBingos(board);
-      // Just verify the function returns an array (column detection works if tested manually)
-      expect(Array.isArray(bingos)).toBe(true);
+      expect(bingos).toContainEqual({ type: 'col', index: 0 });
     });
 
-    it('should detect diagonal (\\) bingo', () => {
-      // Complete all 8 sub-goals (7 blocks around center + center main goal marked complete)
-      // Main goal must also be completed for diagonals to work (it's at position 4,4)
+    it('should NOT detect column bingo when one cell in the column is incomplete', () => {
+      const board = createMockBoard({
+        sub_goals: [
+          createMockSubGoal({
+            position: 0,
+            cells: [
+              createMockCell({ position: 0, is_completed: true }),
+              createMockCell({ position: 3, is_completed: false }), // 하나 미완료
+              createMockCell({ position: 5, is_completed: true }),
+            ],
+          }),
+          createMockSubGoal({
+            position: 3,
+            cells: [
+              createMockCell({ position: 0, is_completed: true }),
+              createMockCell({ position: 3, is_completed: true }),
+              createMockCell({ position: 5, is_completed: true }),
+            ],
+          }),
+          createMockSubGoal({
+            position: 5,
+            cells: [
+              createMockCell({ position: 0, is_completed: true }),
+              createMockCell({ position: 3, is_completed: true }),
+              createMockCell({ position: 5, is_completed: true }),
+            ],
+          }),
+        ],
+      });
+      const bingos = detectBingos(board);
+      expect(bingos).not.toContainEqual({ type: 'col', index: 0 });
+    });
+
+    it('diagonal bingo is structurally impossible — center block cells are always incomplete', () => {
+      // 대각선(\)은 9x9 인덱스 30(3,3)과 50(5,5)을 통과.
+      // 이 두 셀은 센터 블록(1,1) 소속으로 boardToFullGrid에서 절대 isCompleted=true가 되지 않음.
+      // 모든 셀을 완료해도 대각선 빙고는 발생하지 않는다.
       const board = createMockBoard({
         sub_goals: Array.from({ length: 8 }, (_, i) =>
           createMockSubGoal({
@@ -393,13 +485,12 @@ describe('gridMapper', () => {
         ),
       });
       const bingos = detectBingos(board);
-      // Since main goal is not marked as completed in cells (it's separate), diagonals won't complete
-      // But we can test that the function runs without error
-      expect(Array.isArray(bingos)).toBe(true);
+      expect(bingos.filter((b) => b.type === 'diagonal')).toHaveLength(0);
     });
 
-    it('should detect diagonal (/) bingo', () => {
-      // Same as above - anti-diagonal test
+    it('should detect 12 bingos (6 rows + 6 cols) when all sub-goal cells are completed', () => {
+      // 센터 블록(행/열 3~5)을 통과하는 행/열은 빙고 불가.
+      // 가능한 행: 0,1,2,6,7,8 (6개), 가능한 열: 0,1,2,6,7,8 (6개), 대각선: 0개
       const board = createMockBoard({
         sub_goals: Array.from({ length: 8 }, (_, i) =>
           createMockSubGoal({
@@ -411,28 +502,15 @@ describe('gridMapper', () => {
         ),
       });
       const bingos = detectBingos(board);
-      expect(Array.isArray(bingos)).toBe(true);
-    });
-
-    it('should detect multiple bingos when all cells are completed', () => {
-      // When all sub-goal cells are completed, we get bingos from rows/cols
-      // Rows 3,4,5 and cols 3,4,5 and both diagonals are incomplete due to center (4,4) being incomplete
-      // This gives us 4 complete rows + 4 complete cols = 8 bingos
-      const board = createMockBoard({
-        sub_goals: Array.from({ length: 8 }, (_, i) =>
-          createMockSubGoal({
-            position: i,
-            cells: Array.from({ length: 8 }, (_, j) =>
-              createMockCell({ position: j, is_completed: true })
-            ),
-          })
-        ),
-      });
-      const bingos = detectBingos(board);
-      // Expect 4 rows (0,2,6,8) + 4 cols (0,2,6,8) = 8 bingos when center is incomplete
-      expect(bingos).toHaveLength(8);
-      expect(bingos.filter((b) => b.type === 'row')).toHaveLength(4);
-      expect(bingos.filter((b) => b.type === 'col')).toHaveLength(4);
+      expect(bingos).toHaveLength(12);
+      expect(bingos.filter((b) => b.type === 'row')).toHaveLength(6);
+      expect(bingos.filter((b) => b.type === 'col')).toHaveLength(6);
+      expect(bingos.filter((b) => b.type === 'diagonal')).toHaveLength(0);
+      // 가능한 행/열 인덱스만 포함되어야 함
+      const rowIndices = bingos.filter((b) => b.type === 'row').map((b) => b.index);
+      const colIndices = bingos.filter((b) => b.type === 'col').map((b) => b.index);
+      expect(rowIndices.sort()).toEqual([0, 1, 2, 6, 7, 8]);
+      expect(colIndices.sort()).toEqual([0, 1, 2, 6, 7, 8]);
     });
   });
 
@@ -497,6 +575,18 @@ describe('gridMapper', () => {
       // Indices like 39, 41 should return null
       expect(getCellMetadata(board, 39)).toBeNull();
       expect(getCellMetadata(board, 41)).toBeNull();
+    });
+
+    it('block center cells (subGoal title 위치) 는 null 반환 — type: subGoal 은 미사용', () => {
+      // CellMetadata 타입에 subGoal이 정의되어 있으나 getCellMetadata는 이를 반환하지 않음.
+      // 블록 center(예: index 10 = block 0의 중앙)는 subGoal 제목이 렌더링되지만
+      // cellPosition이 center(grid 4)이므로 GRID_TO_SUB_GOAL_POS[4] = undefined → null 반환.
+      const board = createMockBoard({
+        sub_goals: [createMockSubGoal({ position: 0, cells: [] })],
+      });
+      expect(getCellMetadata(board, 10)).toBeNull(); // block 0 center
+      expect(getCellMetadata(board, 13)).toBeNull(); // block 1 center
+      expect(getCellMetadata(board, 37)).toBeNull(); // block 3 center
     });
 
     it('should handle all sub-goals correctly', () => {
