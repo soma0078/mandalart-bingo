@@ -11,11 +11,13 @@ import { useGetBoardById } from '@/hooks/useGetBoardById';
 import type { Board } from '@/types/boards';
 
 const NAV_ITEMS = [
-  { label: '홈', route: '/(tabs)/', activeIcon: 'home' as const, inactiveIcon: 'home-outline' as const, match: ['/', '/(tabs)/'] },
-  { label: '통계', route: '/(tabs)/stats', activeIcon: 'bar-chart' as const, inactiveIcon: 'bar-chart-outline' as const, match: ['/stats', '/(tabs)/stats'] },
-  { label: '내역', route: '/(tabs)/list', activeIcon: 'list' as const, inactiveIcon: 'list-outline' as const, match: ['/list', '/(tabs)/list'] },
-  { label: '설정', route: '/(tabs)/settings', activeIcon: 'settings' as const, inactiveIcon: 'settings-outline' as const, match: ['/settings', '/(tabs)/settings'] },
+  { label: '홈',  route: '/(tabs)/',        activeIcon: 'home' as const,       inactiveIcon: 'home-outline' as const },
+  { label: '통계', route: '/(tabs)/stats',   activeIcon: 'bar-chart' as const,  inactiveIcon: 'bar-chart-outline' as const },
+  { label: '내역', route: '/(tabs)/list',    activeIcon: 'list' as const,       inactiveIcon: 'list-outline' as const },
+  { label: '설정', route: '/(tabs)/settings',activeIcon: 'settings' as const,   inactiveIcon: 'settings-outline' as const },
 ];
+
+const normalizePathname = (p: string) => p.replace(/^\/\(tabs\)/, '') || '/';
 
 function BoardListItem({ board, isActive }: { board: Board; isActive: boolean }) {
   const C = useThemeColors();
@@ -337,7 +339,7 @@ export function AppSidebar() {
         {/* Navigation */}
         <View style={styles.nav}>
           {NAV_ITEMS.map((item) => {
-            const isActive = item.match.some((m) => pathname === m || pathname?.startsWith(m.replace(/\/$/, '') + '/'));
+            const isActive = normalizePathname(pathname ?? '') === normalizePathname(item.route);
             return (
               <Pressable
                 key={item.label}
