@@ -64,6 +64,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 function applyColorScheme(theme: AppTheme) {
+  if (typeof Appearance.setColorScheme !== 'function') return;
   const scheme: ColorSchemeName = theme === 'system' ? null : theme;
   Appearance.setColorScheme(scheme);
 }
