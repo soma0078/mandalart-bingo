@@ -157,7 +157,7 @@ function BoardRow({ title, pct, color }: { title: string; pct: number; color: st
         <Text style={[boardRow.name, { color: C.textPrimary }]}>{title}</Text>
         <Text style={[boardRow.pct, { color }]}>{pct}%</Text>
       </View>
-      <View style={boardRow.pbBg}>
+      <View style={[boardRow.pbBg, { backgroundColor: C.border }]}>
         <View style={[boardRow.pbFill, { width: `${pct}%` as any, backgroundColor: color }]} />
       </View>
     </View>
@@ -169,7 +169,7 @@ const boardRow = StyleSheet.create({
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   name: { fontSize: 14, fontWeight: '600' },
   pct: { fontSize: 14, fontWeight: '700' },
-  pbBg: { height: 6, borderRadius: 3, backgroundColor: '#F3F4F6', overflow: 'hidden' },
+  pbBg: { height: 6, borderRadius: 3, overflow: 'hidden' },
   pbFill: { height: '100%', borderRadius: 3 },
 });
 

@@ -58,7 +58,7 @@ function BoardCard({ board, pct, bingoCount, onPress }: {
         <View style={card.right}>
           <View style={[
             card.badge,
-            isDone ? card.badgeDone : { backgroundColor: C.accentLight },
+            isDone ? { backgroundColor: `${C.success}22` } : { backgroundColor: C.accentLight },
           ]}>
             <Text style={[
               card.badgeText,
@@ -72,7 +72,7 @@ function BoardCard({ board, pct, bingoCount, onPress }: {
       </View>
 
       {/* 프로그레스 바 */}
-      <View style={card.pbBg}>
+      <View style={[card.pbBg, { backgroundColor: C.border }]}>
         {isDone ? (
           <LinearGradient
             colors={['#10B981', '#059669']}
@@ -108,10 +108,9 @@ const card = StyleSheet.create({
   date: { fontSize: 12 },
   right: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   badge: { borderRadius: 10, paddingVertical: 4, paddingHorizontal: 10 },
-  badgeDone: { backgroundColor: '#F0FFF4' },
   badgeText: { fontSize: 12, fontWeight: '600' },
   badgeTextDone: { color: '#10B981' },
-  pbBg: { height: 6, borderRadius: 3, backgroundColor: '#F3F4F6', overflow: 'hidden' },
+  pbBg: { height: 6, borderRadius: 3, overflow: 'hidden' },
   pbFill: { height: '100%', borderRadius: 3 },
   stats: { flexDirection: 'row', gap: 16 },
   statPct: { fontSize: 12, fontWeight: '600' },

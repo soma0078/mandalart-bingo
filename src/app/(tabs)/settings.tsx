@@ -50,7 +50,7 @@ function SettingRow({
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
-        !isLast && styles.rowBorder,
+        !isLast && { borderBottomWidth: 1, borderBottomColor: C.border },
         pressed && onPress && { opacity: 0.6 },
       ]}
     >
@@ -167,7 +167,6 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 12, fontWeight: '600', letterSpacing: 0.5, paddingLeft: 4 },
   card: { borderRadius: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 16 },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
   rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   iconWrap: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   rowLabel: { fontSize: 14 },
