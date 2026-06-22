@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useThemeColors } from '@/contexts/ThemeContext';
 import { useUpdateCell } from '@/hooks/useUpdateCell';
+import { useUpdateSubGoal } from '@/hooks/useUpdateSubGoal';
 import type { BoardDetail } from '@/types/boards';
 
 interface Props {
@@ -28,6 +29,40 @@ export function SubGoalDetailPanel({ board, selectedPos }: Props) {
     : defaultSubGoal;
 
   const { mutate: updateCell } = useUpdateCell(board?.id ?? '');
+  const { mutate: updateSubGoal } = useUpdateSubGoal(board?.id ?? '');
+
+  const [editingCellId, setEditingCellId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleText, setTitleText] = useState('');
+  const inputRef = useRef<TextInput>(null);
+
+  const startEditCell = (cellId: string, currentText: string) => {
+    setEditingCellId(cellId);
+    setEditingText(currentText);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const commitCell = (cellId: string) => {
+    const trimmed = editingText.trim();
+    if (trimmed !== (subGoal?.cells.find((c) => c.id === cellId)?.text ?? '')) {
+      updateCell({ id: cellId, payload: { text: trimmed } });
+    }
+    setEditingCellId(null);
+  };
+
+  const startEditTitle = () => {
+    setTitleText(subGoal?.title ?? '');
+    setEditingTitle(true);
+  };
+
+  const commitTitle = () => {
+    const trimmed = titleText.trim();
+    if (trimmed && subGoal && trimmed !== subGoal.title) {
+      updateSubGoal({ id: subGoal.id, payload: { title: trimmed } });
+    }
+    setEditingTitle(false);
+  };
 
   if (!board || !subGoal) {
     return (
@@ -49,9 +84,24 @@ export function SubGoalDetailPanel({ board, selectedPos }: Props) {
     <View style={[styles.panel, { backgroundColor: C.white }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.title, { color: C.textPrimary }]} numberOfLines={2}>
-          {subGoal.title}
-        </Text>
+        {editingTitle ? (
+          <TextInput
+            style={[styles.titleInput, { color: C.textPrimary, borderColor: C.primary, backgroundColor: C.bg }]}
+            value={titleText}
+            onChangeText={setTitleText}
+            onBlur={commitTitle}
+            onSubmitEditing={commitTitle}
+            autoFocus
+            returnKeyType="done"
+          />
+        ) : (
+          <Pressable onPress={startEditTitle} style={styles.titlePressable}>
+            <Text style={[styles.title, { color: C.textPrimary }]} numberOfLines={2}>
+              {subGoal.title}
+            </Text>
+            <Text style={[styles.editHint, { color: C.textMuted }]}>탭해서 수정</Text>
+          </Pressable>
+        )}
         <View style={styles.progressRow}>
           <Text style={[styles.progressCount, { color: C.textSecondary }]}>{completed}/{total} 완료</Text>
           <Text style={[styles.progressPct, { color: C.primary }]}>{pct}%</Text>
@@ -68,12 +118,9 @@ export function SubGoalDetailPanel({ board, selectedPos }: Props) {
         <Text style={[styles.tasksLabel, { color: C.textSecondary }]}>실행 항목</Text>
         <View style={styles.taskList}>
           {subGoal.cells.map((cell) => (
-            <Pressable
-              key={cell.id}
-              onPress={() => handleToggle(cell.id, cell.is_completed)}
-              style={styles.taskRow}
-            >
-              <View
+            <View key={cell.id} style={styles.taskRow}>
+              <Pressable
+                onPress={() => handleToggle(cell.id, cell.is_completed)}
                 style={[
                   styles.checkbox,
                   {
@@ -85,18 +132,33 @@ export function SubGoalDetailPanel({ board, selectedPos }: Props) {
                 {cell.is_completed && (
                   <Text style={styles.checkmark}>✓</Text>
                 )}
-              </View>
-              <Text
-                style={[
-                  styles.taskText,
-                  { color: cell.is_completed ? C.textMuted : C.textPrimary },
-                  cell.is_completed && styles.taskTextDone,
-                ]}
-                numberOfLines={2}
-              >
-                {cell.text || '(비어있음)'}
-              </Text>
-            </Pressable>
+              </Pressable>
+              {editingCellId === cell.id ? (
+                <TextInput
+                  ref={inputRef}
+                  style={[styles.cellInput, { color: C.textPrimary, borderColor: C.primary, backgroundColor: C.bg }]}
+                  value={editingText}
+                  onChangeText={setEditingText}
+                  onBlur={() => commitCell(cell.id)}
+                  onSubmitEditing={() => commitCell(cell.id)}
+                  returnKeyType="done"
+                  maxLength={40}
+                />
+              ) : (
+                <Pressable onPress={() => startEditCell(cell.id, cell.text)} style={styles.taskTextWrap}>
+                  <Text
+                    style={[
+                      styles.taskText,
+                      { color: cell.is_completed ? C.textMuted : C.textPrimary },
+                      cell.is_completed && styles.taskTextDone,
+                    ]}
+                    numberOfLines={2}
+                  >
+                    {cell.text || '탭해서 입력'}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
           ))}
           {subGoal.cells.length === 0 && (
             <Text style={[styles.emptyTasks, { color: C.textMuted }]}>실행 항목이 없습니다</Text>
@@ -173,6 +235,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
+  },
+  taskTextWrap: {
+    flex: 1,
+  },
+  cellInput: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  titlePressable: {
+    gap: 2,
+  },
+  titleInput: {
+    fontSize: 20,
+    fontWeight: '700',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  editHint: {
+    fontSize: 11,
   },
   checkbox: {
     width: 20,
