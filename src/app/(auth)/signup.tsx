@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 import { Input } from '@/components/ui/Input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { FontSize, Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeColors } from '@/contexts/ThemeContext';
@@ -85,9 +86,8 @@ export default function SignUpScreen() {
                 control={control}
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
+                  <PasswordInput
                     placeholder="6자 이상"
-                    secureTextEntry
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
@@ -105,9 +105,8 @@ export default function SignUpScreen() {
                 control={control}
                 name="passwordConfirm"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
+                  <PasswordInput
                     placeholder="비밀번호를 다시 입력하세요"
-                    secureTextEntry
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
