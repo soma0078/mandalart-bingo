@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,9 +23,10 @@ type FormValues = z.infer<typeof schema>;
 
 export default function SignUpScreen() {
   const C = useThemeColors();
-  const { signUp } = useAuth();
+  const { signUp, signOut } = useAuth();
+  const router = useRouter();
 
-  const { control, handleSubmit, setError, formState: { errors, isSubmitting }, reset } = useForm<FormValues>({
+  const { control, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 
@@ -35,18 +36,10 @@ export default function SignUpScreen() {
       setError('root', { message: error });
       return;
     }
-    if (needsVerification) {
-      // 이메일 인증이 필요한 경우 안내 메시지 표시
-      setError('root', {
-        type: 'verification',
-        message: `${values.email}로 인증 메일을 발송했습니다. 메일함을 확인해 주세요.`,
-      });
-      reset();
-    }
-    // 이메일 인증이 불필요한 경우(session 바로 발급) → AuthContext가 session 업데이트 → 자동 리다이렉트
+    // 이메일 인증 불필요로 session이 바로 생성된 경우 로그아웃 후 로그인 화면으로
+    if (!needsVerification) await signOut();
+    router.replace('/(auth)/login' as any);
   }
-
-  const isVerificationMessage = errors.root?.type === 'verification';
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: C.bg }]}>
@@ -127,16 +120,8 @@ export default function SignUpScreen() {
             </View>
 
             {errors.root && (
-              <View style={[
-                styles.messageBox,
-                isVerificationMessage
-                  ? { backgroundColor: `${C.success}15`, borderColor: `${C.success}40` }
-                  : { backgroundColor: `${C.primary}15`, borderColor: `${C.primary}40` },
-              ]}>
-                <Text style={[
-                  styles.messageBoxText,
-                  { color: isVerificationMessage ? C.success : C.primary },
-                ]}>
+              <View style={[styles.messageBox, { backgroundColor: `${C.primary}15`, borderColor: `${C.primary}40` }]}>
+                <Text style={[styles.messageBoxText, { color: C.primary }]}>
                   {errors.root.message}
                 </Text>
               </View>
