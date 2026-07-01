@@ -4,6 +4,7 @@ import { SymbolView } from 'expo-symbols';
 import { Spacing } from '@/constants/theme';
 import { useTheme, useThemeColors } from '@/contexts/ThemeContext';
 import { THEME_COLOR_OPTIONS } from '@/constants/themeColors';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ─── 상수 ─────────────────────────────────────────────────
 
@@ -75,6 +76,7 @@ function SettingRow({
 export default function SettingsScreen() {
   const C = useThemeColors();
   const { colorSet, setColorSet, appTheme, setAppTheme } = useTheme();
+  const { user, signOut } = useAuth();
 
   const currentThemeLabel = THEME_OPTIONS.find((t) => t.value === appTheme)?.label ?? '시스템';
 
@@ -90,6 +92,13 @@ export default function SettingsScreen() {
 
   const handleLicensePress = () => {
     Alert.alert('오픈소스 라이선스', 'expo, react-native, @supabase/supabase-js, @tanstack/react-query, react-hook-form, zod 등의 오픈소스 라이브러리를 사용합니다.');
+  };
+
+  const handleSignOut = () => {
+    Alert.alert('로그아웃', '로그아웃하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      { text: '로그아웃', style: 'destructive', onPress: () => signOut() },
+    ]);
   };
 
   return (
@@ -130,6 +139,26 @@ export default function SettingsScreen() {
               </Pressable>
             ))}
           </View>
+        </View>
+
+        {/* 계정 섹션 */}
+        <View style={styles.section}>
+          <SectionTitle label="계정" />
+          <SectionCard>
+            <SettingRow
+              icon="person.circle"
+              iconColor={C.textSecondary}
+              label="이메일"
+              value={user?.email ?? ''}
+            />
+            <SettingRow
+              icon="rectangle.portrait.and.arrow.right"
+              iconColor="#EF4444"
+              label="로그아웃"
+              onPress={handleSignOut}
+              isLast
+            />
+          </SectionCard>
         </View>
 
         {/* 앱 정보 섹션 */}
