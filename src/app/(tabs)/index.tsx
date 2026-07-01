@@ -27,6 +27,8 @@ import { ShareModal } from '@/components/ShareModal';
 import { EmptyBoardsState } from '@/components/EmptyBoardsState';
 import { Spacing } from '@/constants/theme';
 import { useThemeColors } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'expo-router';
 import type { Board, BoardDetail } from '@/types/boards';
 
 // ─── Helpers ──────────────────────────────────────────────
@@ -289,6 +291,8 @@ const footer = StyleSheet.create({
 
 export default function HomeScreen() {
   const C = useThemeColors();
+  const { user } = useAuth();
+  const router = useRouter();
   const { data: boards = [], isLoading } = useGertBoards();
   const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>();
   const [viewMode, setViewMode] = useState<'brief' | 'full'>('brief');
@@ -377,6 +381,14 @@ export default function HomeScreen() {
               style={[styles.headerBtn, { backgroundColor: C.white }]}
             >
               <SymbolView name="square.and.arrow.up" size={20} tintColor={C.textPrimary} />
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/(tabs)/settings')}
+              style={[styles.avatar, { backgroundColor: C.primary }]}
+            >
+              <Text style={[styles.avatarText, { color: '#fff' }]}>
+                {user?.email?.charAt(0).toUpperCase() ?? '?'}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -535,6 +547,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   headerBtn: {
     width: 40,
