@@ -7,7 +7,7 @@ import { ActivityIndicator, Platform, View } from 'react-native';
 
 const queryClient = new QueryClient();
 
-function RootRedirect() {
+function RootNavigator() {
   const { session, loading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -32,7 +32,7 @@ function RootRedirect() {
     );
   }
 
-  return null;
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
 
 export default function RootLayout() {
@@ -48,8 +48,7 @@ export default function RootLayout() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <RootRedirect />
-          <Stack screenOptions={{ headerShown: false }} />
+          <RootNavigator />
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
