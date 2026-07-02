@@ -84,10 +84,10 @@ npx expo install expo-web-browser expo-auth-session
 > 실제 웹 dev 서버는 `package.json`의 `"web"` 스크립트 기준 **8081 포트**.
 > Site URL은 fallback 역할만 하며, Redirect URLs allowlist에 없으면 OAuth 콜백이 차단됨.
 
-- [ ] 네이티브 scheme `mandalartbingo://` 등록
-- [ ] Expo Go용 `exp://localhost:8081` 등록
-- [ ] 웹 로컬 `http://localhost:8081` 등록 (`package.json` web 스크립트 기준)
-- [ ] 웹 프로덕션 URL 등록 (배포 시)
+- [x] 네이티브 scheme `mandalartbingo://` 등록
+- [x] Expo Go용 `exp://localhost:8081` 등록
+- [x] 웹 로컬 `http://localhost:8081` 등록 (`package.json` web 스크립트 기준)
+- [x] 웹 프로덕션 URL 등록 (배포 시)
 
 **발생한 에러 및 해결:**
 
@@ -99,20 +99,37 @@ npx expo install expo-web-browser expo-auth-session
 
 ## Phase 2 — Google 로그인
 
-### 2-1. Google Cloud Console 설정
+### 2-1. Supabase Callback URL 확인
+
+> **공식 문서:** https://supabase.com/docs/guides/auth/social-login/auth-google
+
+승인된 리디렉션 URI는 Supabase 대시보드에서 직접 확인:
+
+```
+Authentication → Providers → Google → Callback URL (for OAuth)
+```
+
+형식:
+```
+https://<project-ref>.supabase.co/auth/v1/callback
+```
+
+- [ ] Supabase Google Provider 화면에서 Callback URL 복사
+
+---
+
+### 2-2. Google Cloud Console 설정
 
 1. https://console.cloud.google.com → 프로젝트 선택 또는 생성
-2. **API 및 서비스 → 사용자 인증 정보 → OAuth 2.0 클라이언트 ID 만들기**
-3. 애플리케이션 유형: **웹 애플리케이션**
-4. 승인된 리디렉션 URI 추가:
-   ```
-   https://<supabase-project-ref>.supabase.co/auth/v1/callback
-   ```
+2. **API 및 서비스 → OAuth 동의 화면** 구성 (User Type: External)
+3. **API 및 서비스 → 사용자 인증 정보 → OAuth 2.0 클라이언트 ID 만들기**
+4. 애플리케이션 유형: **웹 애플리케이션**
+5. **승인된 리디렉션 URI**에 위에서 복사한 Supabase Callback URL 추가
 
 - [ ] Google Cloud 프로젝트 생성 또는 선택
 - [ ] OAuth 동의 화면 구성 완료
 - [ ] 웹 클라이언트 ID 생성
-- [ ] Supabase 콜백 URL을 리디렉션 URI에 추가
+- [ ] Supabase Callback URL을 리디렉션 URI에 추가
 - [ ] Client ID, Client Secret 복사
 
 **발생한 에러 및 해결:**
@@ -121,7 +138,7 @@ npx expo install expo-web-browser expo-auth-session
 (기록)
 ```
 
-### 2-2. Supabase Google Provider 활성화
+### 2-3. Supabase Google Provider 활성화
 
 **위치:** Authentication → Providers → Google
 
@@ -136,7 +153,7 @@ npx expo install expo-web-browser expo-auth-session
 (기록)
 ```
 
-### 2-3. 코드 구현
+### 2-4. 코드 구현
 
 **`src/lib/oauth.ts` 생성:**
 
