@@ -8,17 +8,17 @@
 
 ## 참고 공식 문서
 
-| 항목 | 링크 |
-|---|---|
-| Supabase OAuth 개요 | https://supabase.com/docs/guides/auth/social-login |
-| Supabase Google Provider | https://supabase.com/docs/guides/auth/social-login/auth-google |
-| Supabase Apple Provider | https://supabase.com/docs/guides/auth/social-login/auth-apple |
-| expo-web-browser | https://docs.expo.dev/versions/latest/sdk/webbrowser/ |
-| expo-auth-session | https://docs.expo.dev/versions/latest/sdk/auth-session/ |
-| makeRedirectUri | https://docs.expo.dev/versions/latest/sdk/auth-session/#makeredirecturioptions |
-| Expo 딥링크 설정 | https://docs.expo.dev/guides/linking/ |
-| Google Cloud Console | https://console.cloud.google.com/apis/credentials |
-| Apple Developer | https://developer.apple.com/account/resources/identifiers/list |
+| 항목                     | 링크                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| Supabase OAuth 개요      | https://supabase.com/docs/guides/auth/social-login                             |
+| Supabase Google Provider | https://supabase.com/docs/guides/auth/social-login/auth-google                 |
+| Supabase Apple Provider  | https://supabase.com/docs/guides/auth/social-login/auth-apple                  |
+| expo-web-browser         | https://docs.expo.dev/versions/latest/sdk/webbrowser/                          |
+| expo-auth-session        | https://docs.expo.dev/versions/latest/sdk/auth-session/                        |
+| makeRedirectUri          | https://docs.expo.dev/versions/latest/sdk/auth-session/#makeredirecturioptions |
+| Expo 딥링크 설정         | https://docs.expo.dev/guides/linking/                                          |
+| Google Cloud Console     | https://console.cloud.google.com/apis/credentials                              |
+| Apple Developer          | https://developer.apple.com/account/resources/identifiers/list                 |
 
 ---
 
@@ -35,26 +35,30 @@ npx expo install expo-web-browser expo-auth-session
 - [ ] `package.json` 버전 확인
 
 **발생한 에러 및 해결:**
+
 ```
 (기록)
 ```
 
 ---
 
-### app.json — Scheme 등록
+### app.json — Scheme 확인
+
+현재 `app.json`에 이미 등록되어 있음:
 
 ```json
 {
   "expo": {
-    "scheme": "mandalart-bingo"
+    "scheme": "mandalartbingo"
   }
 }
 ```
 
-- [ ] `app.json`에 `scheme` 필드 추가
+- [x] `app.json`에 `scheme` 필드 확인 (`mandalartbingo`)
 - [ ] `npx expo start` 재시작 후 scheme 적용 확인
 
 **발생한 에러 및 해결:**
+
 ```
 (기록)
 ```
@@ -69,18 +73,24 @@ npx expo install expo-web-browser expo-auth-session
 
 등록할 URL 목록:
 
-| 환경 | URL |
-|---|---|
-| Expo Go (개발) | `exp://localhost:8081` |
-| 커스텀 scheme (개발 빌드) | `mandalart-bingo://` |
-| 웹 로컬 | `http://localhost:8081` |
-| 웹 프로덕션 | `https://<배포 도메인>` |
+| 환경                           | URL                     |
+| ------------------------------ | ----------------------- |
+| 네이티브 앱 (개발 빌드 / 배포) | `mandalartbingo://`     |
+| Expo Go (개발)                 | `exp://localhost:8081`  |
+| 웹 로컬                        | `http://localhost:8081` |
+| 웹 프로덕션                    | `https://<배포 도메인>` |
 
+> **주의:** Supabase Site URL의 `http://localhost:3000`은 프로젝트 생성 시 자동으로 채워진 초기값.
+> 실제 웹 dev 서버는 `package.json`의 `"web"` 스크립트 기준 **8081 포트**.
+> Site URL은 fallback 역할만 하며, Redirect URLs allowlist에 없으면 OAuth 콜백이 차단됨.
+
+- [ ] 네이티브 scheme `mandalartbingo://` 등록
 - [ ] Expo Go용 `exp://localhost:8081` 등록
-- [ ] 커스텀 scheme `mandalart-bingo://` 등록
-- [ ] 웹 URL 등록
+- [ ] 웹 로컬 `http://localhost:8081` 등록 (`package.json` web 스크립트 기준)
+- [ ] 웹 프로덕션 URL 등록 (배포 시)
 
 **발생한 에러 및 해결:**
+
 ```
 (기록)
 ```
@@ -106,6 +116,7 @@ npx expo install expo-web-browser expo-auth-session
 - [ ] Client ID, Client Secret 복사
 
 **발생한 에러 및 해결:**
+
 ```
 (기록)
 ```
@@ -120,6 +131,7 @@ npx expo install expo-web-browser expo-auth-session
 - [ ] 저장
 
 **발생한 에러 및 해결:**
+
 ```
 (기록)
 ```
@@ -129,17 +141,17 @@ npx expo install expo-web-browser expo-auth-session
 **`src/lib/oauth.ts` 생성:**
 
 ```ts
-import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri } from 'expo-auth-session';
-import { Platform } from 'react-native';
-import { supabase } from './supabase';
+import * as WebBrowser from "expo-web-browser";
+import { makeRedirectUri } from "expo-auth-session";
+import { Platform } from "react-native";
+import { supabase } from "./supabase";
 
 WebBrowser.maybeCompleteAuthSession();
 
-export async function signInWithOAuth(provider: 'google' | 'apple') {
+export async function signInWithOAuth(provider: "google" | "apple") {
   const redirectTo = makeRedirectUri({
-    scheme: 'mandalart-bingo',
-    path: 'auth/callback',
+    scheme: "mandalartbingo",
+    path: "auth/callback",
   });
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -150,21 +162,22 @@ export async function signInWithOAuth(provider: 'google' | 'apple') {
     },
   });
 
-  if (error || !data.url) return { error: error?.message ?? 'OAuth URL 생성 실패' };
+  if (error || !data.url)
+    return { error: error?.message ?? "OAuth URL 생성 실패" };
 
   // 웹은 브라우저 리디렉트 방식
-  if (Platform.OS === 'web') {
+  if (Platform.OS === "web") {
     await supabase.auth.signInWithOAuth({ provider, options: { redirectTo } });
     return { error: null };
   }
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
 
-  if (result.type === 'success') {
+  if (result.type === "success") {
     const url = new URL(result.url);
     const params = new URLSearchParams(url.hash.slice(1));
-    const access_token = params.get('access_token');
-    const refresh_token = params.get('refresh_token');
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
 
     if (access_token && refresh_token) {
       await supabase.auth.setSession({ access_token, refresh_token });
@@ -181,11 +194,13 @@ export async function signInWithOAuth(provider: 'google' | 'apple') {
 - [ ] 실제 로그인 플로우 테스트
 
 **실제 테스트 결과:**
+
 ```
 (기록 — Expo Go / 개발 빌드 / 웹 각각)
 ```
 
 **발생한 에러 및 해결:**
+
 ```
 (기록)
 ```
@@ -218,6 +233,7 @@ export async function signInWithOAuth(provider: 'google' | 'apple') {
 **Team ID:** `__________`
 
 **발생한 에러 및 해결:**
+
 ```
 (기록)
 ```
@@ -234,6 +250,7 @@ export async function signInWithOAuth(provider: 'google' | 'apple') {
 - [ ] 저장
 
 **발생한 에러 및 해결:**
+
 ```
 (기록)
 ```
@@ -247,7 +264,7 @@ npx expo install expo-apple-authentication
 ```
 
 ```ts
-import * as AppleAuthentication from 'expo-apple-authentication';
+import * as AppleAuthentication from "expo-apple-authentication";
 
 const credential = await AppleAuthentication.signInAsync({
   requestedScopes: [
@@ -257,7 +274,7 @@ const credential = await AppleAuthentication.signInAsync({
 });
 
 const { data, error } = await supabase.auth.signInWithIdToken({
-  provider: 'apple',
+  provider: "apple",
   token: credential.identityToken!,
 });
 ```
@@ -268,6 +285,7 @@ const { data, error } = await supabase.auth.signInWithIdToken({
 - [ ] 실기기(iOS) 테스트
 
 **발생한 에러 및 해결:**
+
 ```
 (기록)
 ```
@@ -278,14 +296,14 @@ const { data, error } = await supabase.auth.signInWithIdToken({
 
 ### 체크리스트
 
-| 시나리오 | Expo Go | 개발 빌드 | 웹 | 결과 |
-|---|---|---|---|---|
-| Google 로그인 성공 | | | | |
-| Google 로그인 후 세션 유지 | | | | |
-| Google 로그인 → 앱 재시작 후 자동 로그인 | | | | |
-| Apple 로그인 성공 (iOS) | — | | — | |
-| 로그아웃 후 재로그인 | | | | |
-| OAuth 취소 시 에러 없이 복귀 | | | | |
+| 시나리오                                 | Expo Go | 개발 빌드 | 웹  | 결과 |
+| ---------------------------------------- | ------- | --------- | --- | ---- |
+| Google 로그인 성공                       |         |           |     |      |
+| Google 로그인 후 세션 유지               |         |           |     |      |
+| Google 로그인 → 앱 재시작 후 자동 로그인 |         |           |     |      |
+| Apple 로그인 성공 (iOS)                  | —       |           | —   |      |
+| 로그아웃 후 재로그인                     |         |           |     |      |
+| OAuth 취소 시 에러 없이 복귀             |         |           |     |      |
 
 **범례:** ✅ 통과 / ❌ 실패 / ⏳ 미진행
 
@@ -293,18 +311,18 @@ const { data, error } = await supabase.auth.signInWithIdToken({
 
 ## 주의사항 및 자주 발생하는 에러
 
-| 에러 | 원인 | 해결 |
-|---|---|---|
-| `redirect_uri_mismatch` | Google Console에 콜백 URL 미등록 | Supabase 콜백 URL 정확히 등록 |
-| `WebBrowser` 열림 없이 바로 닫힘 | `maybeCompleteAuthSession()` 누락 | 파일 최상단에 호출 추가 |
-| Expo Go에서 scheme 미작동 | 커스텀 scheme은 Expo Go 미지원 | 개발 빌드(`expo run:ios`) 사용 |
-| Apple Key 재발급 불가 | `.p8` 분실 | Key 삭제 후 재생성 |
-| 세션 미설정 (토큰 파싱 실패) | URL hash 파싱 오류 | `url.hash` vs `url.search` 확인 |
+| 에러                             | 원인                              | 해결                            |
+| -------------------------------- | --------------------------------- | ------------------------------- |
+| `redirect_uri_mismatch`          | Google Console에 콜백 URL 미등록  | Supabase 콜백 URL 정확히 등록   |
+| `WebBrowser` 열림 없이 바로 닫힘 | `maybeCompleteAuthSession()` 누락 | 파일 최상단에 호출 추가         |
+| Expo Go에서 scheme 미작동        | 커스텀 scheme은 Expo Go 미지원    | 개발 빌드(`expo run:ios`) 사용  |
+| Apple Key 재발급 불가            | `.p8` 분실                        | Key 삭제 후 재생성              |
+| 세션 미설정 (토큰 파싱 실패)     | URL hash 파싱 오류                | `url.hash` vs `url.search` 확인 |
 
 ---
 
 ## 변경 이력
 
-| 날짜 | 작성자 | 내용 |
-|---|---|---|
-| 2026-07-01 | — | 초안 작성 |
+| 날짜       | 작성자 | 내용      |
+| ---------- | ------ | --------- |
+| 2026-07-01 | —      | 초안 작성 |
