@@ -37,11 +37,18 @@ function RootNavigator() {
 
 export default function RootLayout() {
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      import('@vercel/speed-insights').then(({ injectSpeedInsights }) => {
-        injectSpeedInsights();
-      });
+    if (Platform.OS !== 'web') return;
+
+    // OAuth 팝업으로 열린 경우 세션 저장 후 자동 닫기
+    // window.opener가 있으면 이 창은 팝업임
+    if (window.opener && window.opener !== window) {
+      window.close();
+      return;
     }
+
+    import('@vercel/speed-insights').then(({ injectSpeedInsights }) => {
+      injectSpeedInsights();
+    });
   }, []);
 
   return (
