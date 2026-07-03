@@ -12,11 +12,25 @@ export async function signInWithOAuth(provider: 'google' | 'apple') {
   });
 
   if (Platform.OS === 'web') {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo },
+      options: { redirectTo, skipBrowserRedirect: true },
     });
-    return { error: error?.message ?? null };
+    if (error || !data.url) return { error: error?.message ?? 'OAuth URL 생성 실패' };
+
+    // 팝업으로 OAuth 창 열기
+    // 인증 완료 시 팝업이 redirectTo로 이동 → Supabase SDK가 토큰을 localStorage에 저장
+    // → 메인 창 onAuthStateChange가 storage 이벤트로 세션 감지
+    const width = 500;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+    window.open(
+      data.url,
+      'oauth-popup',
+      `popup,width=${width},height=${height},left=${left},top=${top}`,
+    );
+    return { error: null };
   }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
