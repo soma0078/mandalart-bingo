@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -18,6 +19,7 @@ import { PasswordInput } from "@/components/ui/PasswordInput";
 import { FontSize, Radius, Spacing } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
+import { signInWithOAuth } from "@/lib/oauth";
 
 const schema = z.object({
   email: z.string().email("올바른 이메일을 입력하세요"),
@@ -44,7 +46,13 @@ export default function LoginScreen() {
     if (error) {
       setError("root", { message: "이메일 또는 비밀번호가 올바르지 않습니다" });
     }
-    // 성공 시 AuthContext가 session을 업데이트하고 _layout에서 자동 리다이렉트
+  }
+
+  async function onGoogleSignIn() {
+    const { error } = await signInWithOAuth('google');
+    if (error) {
+      setError("root", { message: error });
+    }
   }
 
   return (
@@ -150,6 +158,28 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
+          {/* 구분선 */}
+          <View style={styles.divider}>
+            <View style={[styles.dividerLine, { backgroundColor: C.border }]} />
+            <Text style={[styles.dividerText, { color: C.textMuted }]}>또는</Text>
+            <View style={[styles.dividerLine, { backgroundColor: C.border }]} />
+          </View>
+
+          {/* 소셜 로그인 */}
+          <Pressable
+            onPress={onGoogleSignIn}
+            disabled={isSubmitting}
+            style={({ pressed }) => [
+              styles.socialButton,
+              { borderColor: C.border, backgroundColor: C.white, opacity: pressed ? 0.7 : 1 },
+            ]}
+          >
+            <Ionicons name="logo-google" size={18} color="#4285F4" />
+            <Text style={[styles.socialButtonText, { color: C.textPrimary }]}>
+              Google로 계속하기
+            </Text>
+          </Pressable>
+
           <View style={styles.footer}>
             <Text style={[styles.footerText, { color: C.textSecondary }]}>
               계정이 없으신가요?
@@ -205,6 +235,32 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xs,
   },
   buttonText: { color: "#fff", fontSize: FontSize.body, fontWeight: "700" },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    fontSize: FontSize.caption,
+    fontWeight: "500",
+  },
+  socialButton: {
+    height: 54,
+    borderRadius: Radius.lg,
+    borderWidth: 1.5,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.sm,
+  },
+  socialButtonText: {
+    fontSize: FontSize.body,
+    fontWeight: "600",
+  },
   footer: {
     flexDirection: "row",
     gap: Spacing.xs,
