@@ -307,65 +307,230 @@ if (window.opener && window.opener !== window) {
 
 ---
 
-## Phase 3 — Apple 로그인
+## Phase 3 — Kakao 로그인
 
-> Apple 로그인은 **App Store 배포 시 필수** (타사 OAuth를 제공하는 앱 기준, Apple 가이드라인 4.8)
+> **⚠️ 중요:** Supabase는 Kakao를 기본 OAuth Provider로 지원하지 않음.
+> Kakao SDK로 토큰을 직접 획득한 뒤, **Supabase Edge Function**을 통해 Supabase 세션으로 교환하는 방식을 사용.
 
-### 3-1. Apple Developer 설정
+### 참고 문서
 
-1. https://developer.apple.com → Certificates, Identifiers & Profiles
-2. **Identifiers → 앱 ID 선택 → Sign in with Apple 활성화**
-3. **Identifiers → Services IDs → 새 Services ID 생성**
-   - Identifier: `im.pppp.mandalart-bingo`
-   - Sign in with Apple 활성화 → Configure
-   - Return URLs: `https://<supabase-project-ref>.supabase.co/auth/v1/callback`
-4. **Keys → 새 Key 생성 → Sign in with Apple 체크**
-   - `.p8` 파일 다운로드 (재다운로드 불가)
-
-- [ ] 앱 ID에 Sign in with Apple 활성화
-- [ ] Services ID 생성 및 Return URL 등록
-- [ ] Key 생성 및 `.p8` 파일 저장
-- [ ] Key ID, Team ID 기록
-
-**Key ID:** `__________`  
-**Team ID:** `__________`
+| 항목 | 링크 |
+| --- | --- |
+| Kakao Developers | https://developers.kakao.com |
+| Kakao JS SDK | https://developers.kakao.com/docs/latest/ko/javascript/getting-started |
+| @react-native-seoul/kakao-login | https://github.com/crossplatformkorea/react-native-kakao-login |
+| Supabase Edge Functions | https://supabase.com/docs/guides/functions |
+| Supabase Admin API (createUser) | https://supabase.com/docs/reference/javascript/auth-admin-createuser |
 
 ---
 
-### 3-2. Supabase Apple Provider 활성화
+### 3-1. Kakao Developers 앱 등록
 
-- [ ] Apple Provider 활성화
-- [ ] Service ID (Client ID) 입력
-- [ ] Team ID / Key ID / `.p8` 파일 내용 입력
-- [ ] 저장
+1. https://developers.kakao.com → 내 애플리케이션 → 애플리케이션 추가
+2. **앱 키** 확인 (JavaScript 키, REST API 키, Native 앱 키)
+3. **플랫폼 추가:**
+   - Web: 사이트 도메인 등록 (`http://localhost:8081`, `https://<배포 도메인>`)
+   - iOS: 번들 ID 등록 (`com.soma0078.mandalartbingo`)
+   - Android: 패키지명 + 키 해시 등록
+4. **카카오 로그인 → 활성화**
+5. **Redirect URI 등록** (웹 방식 사용 시):
+   ```
+   http://localhost:8081/auth/callback
+   https://<배포 도메인>/auth/callback
+   ```
+6. **동의항목** 설정: 이메일(선택), 프로필(닉네임/프로필사진) 등
+
+- [ ] 애플리케이션 생성
+- [ ] 앱 키 복사 (JavaScript 키, REST API 키)
+- [ ] 플랫폼 등록 (Web / iOS / Android)
+- [ ] 카카오 로그인 활성화
+- [ ] Redirect URI 등록
+- [ ] 동의항목 설정
 
 ---
 
-### 3-3. 네이티브 Apple 로그인 (권장)
+### 3-2. Supabase Edge Function — 토큰 교환
+
+Kakao 토큰을 Supabase 세션으로 교환하는 서버리스 함수.
 
 ```bash
-npx expo install expo-apple-authentication
+npx supabase functions new kakao-auth
+```
+
+**`supabase/functions/kakao-auth/index.ts`:**
+
+```ts
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, // admin 권한
+);
+
+Deno.serve(async (req) => {
+  const { kakao_access_token } = await req.json();
+
+  // 1. Kakao API로 사용자 정보 조회
+  const kakaoRes = await fetch('https://kapi.kakao.com/v2/user/me', {
+    headers: { Authorization: `Bearer ${kakao_access_token}` },
+  });
+  if (!kakaoRes.ok) {
+    return new Response(JSON.stringify({ error: 'Kakao 사용자 조회 실패' }), { status: 400 });
+  }
+  const kakaoUser = await kakaoRes.json();
+
+  const kakaoId = String(kakaoUser.id);
+  const email = kakaoUser.kakao_account?.email;
+  const name = kakaoUser.kakao_account?.profile?.nickname;
+
+  // 2. 기존 유저 조회 또는 신규 생성
+  const { data: existingUsers } = await supabase.auth.admin.listUsers();
+  const existing = existingUsers?.users.find(
+    (u) => u.user_metadata?.kakao_id === kakaoId,
+  );
+
+  let userId: string;
+
+  if (existing) {
+    userId = existing.id;
+  } else {
+    const { data: newUser, error } = await supabase.auth.admin.createUser({
+      email: email ?? `kakao_${kakaoId}@kakao.local`,
+      email_confirm: true,
+      user_metadata: { kakao_id: kakaoId, full_name: name, provider: 'kakao' },
+    });
+    if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    userId = newUser.user!.id;
+  }
+
+  // 3. 해당 유저의 세션 생성
+  const { data: session, error: sessionError } = await supabase.auth.admin.createSession({ userId });
+  if (sessionError) return new Response(JSON.stringify({ error: sessionError.message }), { status: 500 });
+
+  return new Response(JSON.stringify(session), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+});
+```
+
+```bash
+npx supabase functions deploy kakao-auth
+```
+
+- [ ] Edge Function 생성
+- [ ] 코드 작성
+- [ ] 배포 완료
+- [ ] Supabase 대시보드에서 함수 확인
+
+---
+
+### 3-3. 클라이언트 코드 구현
+
+#### 웹 (Kakao JS SDK)
+
+`index.html` 또는 루트 레이아웃에 SDK 로드 (웹 전용):
+
+```html
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 ```
 
 ```ts
-import * as AppleAuthentication from 'expo-apple-authentication';
+// src/lib/oauth.ts에 추가
+export async function signInWithKakao() {
+  if (Platform.OS === 'web') {
+    const Kakao = (window as any).Kakao;
+    if (!Kakao.isInitialized()) {
+      Kakao.init(process.env.EXPO_PUBLIC_KAKAO_JS_KEY);
+    }
 
-const credential = await AppleAuthentication.signInAsync({
-  requestedScopes: [
-    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-    AppleAuthentication.AppleAuthenticationScope.EMAIL,
-  ],
+    return new Promise<{ error: string | null }>((resolve) => {
+      Kakao.Auth.login({
+        success: async (authObj: { access_token: string }) => {
+          const res = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/kakao-auth`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_KEY}`,
+            },
+            body: JSON.stringify({ kakao_access_token: authObj.access_token }),
+          });
+          const session = await res.json();
+          if (session.error) return resolve({ error: session.error });
+          await supabase.auth.setSession({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+          });
+          resolve({ error: null });
+        },
+        fail: () => resolve({ error: '카카오 로그인 실패' }),
+      });
+    });
+  }
+
+  // 네이티브는 아래 참고
+  return { error: '네이티브 미구현' };
+}
+```
+
+#### 네이티브 (`@react-native-seoul/kakao-login`)
+
+> **⚠️ Expo Go 미지원** — 개발 빌드(`expo run:ios`) 필요
+
+```bash
+npx expo install @react-native-seoul/kakao-login
+```
+
+`app.json`에 config plugin 추가:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      ["@react-native-seoul/kakao-login", {
+        "kakaoAppKey": "YOUR_NATIVE_APP_KEY",
+        "kotlinVersion": "1.8.0"
+      }]
+    ]
+  }
+}
+```
+
+```ts
+import { login } from '@react-native-seoul/kakao-login';
+
+const { accessToken } = await login();
+
+const res = await fetch(`${SUPABASE_URL}/functions/v1/kakao-auth`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${SUPABASE_KEY}`,
+  },
+  body: JSON.stringify({ kakao_access_token: accessToken }),
 });
-
-await supabase.auth.signInWithIdToken({
-  provider: 'apple',
-  token: credential.identityToken!,
+const session = await res.json();
+await supabase.auth.setSession({
+  access_token: session.access_token,
+  refresh_token: session.refresh_token,
 });
 ```
 
-- [ ] `expo-apple-authentication` 설치
-- [ ] `app.json`에 `usesAppleSignIn: true` 추가
-- [ ] 실기기(iOS) 테스트
+- [ ] 웹: Kakao JS SDK 초기화 및 로그인 구현
+- [ ] 네이티브: `@react-native-seoul/kakao-login` 설치 및 config plugin 설정
+- [ ] Edge Function 연동 테스트
+- [ ] `EXPO_PUBLIC_KAKAO_JS_KEY` 환경변수 `.env`에 추가
+
+---
+
+### 3-4. Google과의 구현 차이
+
+| 항목 | Google | Kakao |
+| --- | --- | --- |
+| Supabase 기본 지원 | ✅ | ❌ (Edge Function 필요) |
+| 토큰 교환 주체 | Supabase 서버 자동 처리 | 직접 Edge Function 구현 |
+| 웹 방식 | `window.open()` 팝업 | Kakao JS SDK 팝업 |
+| 네이티브 방식 | `WebBrowser.openAuthSessionAsync` | `@react-native-seoul/kakao-login` |
+| Expo Go 지원 | ⚠️ 제한적 | ❌ 불가 |
 
 ---
 
@@ -376,7 +541,8 @@ await supabase.auth.signInWithIdToken({
 | Google 로그인 성공 | | | | |
 | Google 로그인 후 세션 유지 | | | | |
 | 앱 재시작 후 자동 로그인 | | | | |
-| Apple 로그인 성공 (iOS) | — | | — | |
+| Kakao 로그인 성공 | — | | | |
+| Kakao 로그인 후 세션 유지 | — | | | |
 | 로그아웃 후 재로그인 | | | | |
 | OAuth 취소 시 에러 없이 복귀 | | | | |
 
@@ -391,3 +557,4 @@ await supabase.auth.signInWithIdToken({
 | 2026-07-01 | 초안 작성 |
 | 2026-07-02 | scheme 오류 수정 (`mandalart-bingo` → `mandalartbingo`), 포트 정정, Redirect URL 목록 업데이트 |
 | 2026-07-03 | Google 로그인 구현 완료, 트러블슈팅 3건 기록 (Vercel fallback / Unmatched Route / 팝업 미닫힘) |
+| 2026-07-09 | Phase 3 Apple → Kakao 로그인으로 교체 (Edge Function 방식) |
